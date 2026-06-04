@@ -4,6 +4,15 @@ The Jira coding agent processes stories from a Kanban board through a label-driv
 pipeline. See [`system-flow.mmd`](system-flow.mmd) / [`system-flow.svg`](system-flow.svg)
 for the full diagram.
 
+## Runtime (SST on AWS)
+
+| Component | Tech | Purpose | Status |
+|-----------|------|---------|--------|
+| **Agent cron** | `sst.aws.Cron` (`rate(2 minutes)`) → Lambda | Docks Jira, runs the pipeline each tick | ✅ Available |
+| **Run log** | `sst.aws.Dynamo` | Persists per-run summaries + events | ✅ Available |
+| **Dashboard** | `sst.aws.Remix` | Visualizes runs/events, auto-refresh 15s | ✅ Available |
+| **Auth/login** | — | UI auth for the dashboard | 🚧 Not yet (public) |
+
 ## Pipeline steps
 
 | # | Step | Trigger | Result | Status |
