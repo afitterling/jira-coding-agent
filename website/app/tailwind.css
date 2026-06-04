@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    @apply bg-ink-950 text-slate-300 antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  ::selection {
+    @apply bg-accent/40 text-white;
+  }
+
+  /* Honour reduced-motion preferences for accessibility + Lighthouse */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Section reveal-on-scroll */
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+      opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Gradient text */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(
+      100deg,
+      #c7d2fe 0%,
+      #a5b4fc 30%,
+      #818cf8 55%,
+      #67e8f9 100%
+    );
+  }
+
+  /* Jira-style label pills */
+  .label-pill {
+    @apply inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-mono text-xs font-medium leading-5;
+  }
+
+  /* Frosted card */
+  .card {
+    @apply rounded-2xl border border-white/10 bg-white/[0.03] shadow-card backdrop-blur-sm;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white shadow-glow transition-all hover:bg-accent-violet hover:shadow-[0_0_80px_-12px_rgba(139,92,246,0.6)] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-ink-950;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 px-5 py-3 text-sm font-semibold text-slate-200 transition-colors hover:border-white/30 hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan;
+  }
+}
+
+@layer utilities {
+  /* Subtle dotted grid backdrop */
+  .bg-grid {
+    background-image: radial-gradient(
+      rgba(148, 163, 184, 0.12) 1px,
+      transparent 1px
+    );
+    background-size: 32px 32px;
+  }
+
+  .mask-fade-b {
+    -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  }
+}
