@@ -1,0 +1,60 @@
+%%{init: {'theme':'base','themeVariables':{'fontFamily':'Inter, sans-serif','primaryColor':'#eef2ff','primaryBorderColor':'#6366f1','lineColor':'#94a3b8','primaryTextColor':'#1e293b'}}}%%
+flowchart TD
+    Start([Start: Agent run triggered]) --> Token
+
+    subgraph AUTH["🔐 Authentication"]
+        Token["Load Jira API token<br/>from secure env / vault"]
+        Token --> Attach["Attach token to request<br/>Authorization: Bearer / Basic"]
+    end
+
+    Attach --> Pull
+
+    subgraph FETCH["📥 Fetch from Kanban"]
+        Pull["Pull all tickets / stories<br/>GET /rest/api/3/search<br/>(JQL: board = Kanban)"]
+        Pull --> Store[("Stories cache<br/>id, summary, labels, body")]
+    end
+
+    Store --> Loop{For each story}
+
+    %% ---- Stage 1: Revise selection ----
+    Loop --> Filter1{"Has #revise<br/>AND #undone ?"}
+    Filter1 -- No --> SkipRevise[Skip revision]
+    Filter1 -- Yes --> ReadStory["1. Read story<br/>content + acceptance criteria"]
+
+    %% ---- Stage 2: Revise + label ----
+    ReadStory --> PromptRevise["Run revise prompt (LLM)<br/>refine spec / acceptance criteria"]
+    PromptRevise --> ReviseDone{Revision<br/>finished ok?}
+    ReviseDone -- No --> RetryRevise["Flag for human review<br/>keep #undone"]
+    ReviseDone -- Yes --> LabelRevised["2. Update story<br/>add #revised, remove #undone"]
+
+    LabelRevised --> ReadyCheck
+    SkipRevise --> ReadyCheck
+
+    %% ---- Stage 3: Execute code work ----
+    ReadyCheck{"Has #ready ?"}
+    ReadyCheck -- No --> NextStory[Next story]
+    ReadyCheck -- Yes --> ExecCode["3. Execute code work (LLM agent)<br/>generate code, run tests"]
+
+    ExecCode --> CodeOk{Tests pass /<br/>work complete?}
+    CodeOk -- No --> FailCode["Comment failure on ticket<br/>keep #ready"]
+    CodeOk -- Yes --> LabelImpl["4. Update story<br/>add #implemented<br/>open PR / push branch"]
+
+    LabelImpl --> NextStory
+    FailCode --> NextStory
+    RetryRevise --> NextStory
+
+    NextStory --> Loop
+    Loop -- All processed --> Report["Post summary report<br/>back to Jira / Slack"]
+    Report --> End([End])
+
+    classDef auth fill:#fef3c7,stroke:#f59e0b,color:#78350f;
+    classDef fetch fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a;
+    classDef action fill:#dcfce7,stroke:#22c55e,color:#14532d;
+    classDef decision fill:#f3e8ff,stroke:#a855f7,color:#581c87;
+    classDef terminal fill:#1e293b,stroke:#0f172a,color:#f8fafc;
+
+    class Token,Attach auth;
+    class Pull,Store fetch;
+    class ReadStory,PromptRevise,LabelRevised,ExecCode,LabelImpl,Report action;
+    class Filter1,ReviseDone,ReadyCheck,CodeOk,Loop decision;
+    class Start,End terminal;
