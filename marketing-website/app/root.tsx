@@ -27,18 +27,19 @@ export const links: LinksFunction = () => [
 ];
 
 export const meta: MetaFunction = () => [
-  { title: "Code as spec. Driven by Jira. — Autonomous Claude coding agent" },
+  { title: "Agentic Coding with Jira — sp33c" },
   {
     name: "description",
     content:
-      "Turn a Jira story into shipped code. Label it #ready and an autonomous Claude Opus agent implements it, runs tests + QA, and opens a PR for human review.",
+      "sp33c builds agentic coding with Jira: label a story #ready and an autonomous Claude Opus agent implements it, runs tests + QA, and opens a PR. Human Override keeps you in command.",
   },
-  { name: "theme-color", content: "#06060c" },
-  { property: "og:title", content: "Code as spec. Driven by Jira." },
+  { name: "author", content: "Alex Fitterling — sp33c" },
+  { name: "theme-color", content: "#030307" },
+  { property: "og:title", content: "Agentic Coding with Jira — sp33c" },
   {
     property: "og:description",
     content:
-      "An autonomous Claude Opus coding agent that ships your Jira backlog — implement, test, QA, PR.",
+      "Agentic coding with Jira by sp33c — implement, test, QA, PR. Autonomy you can veto.",
   },
   { property: "og:type", content: "website" },
 ];

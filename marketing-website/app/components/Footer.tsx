@@ -42,15 +42,16 @@ export function Footer() {
                 {"</>"}
               </span>
               <span className="font-mono text-sm font-semibold text-slate-100">
-                code·as·spec
+                sp<span className="text-accent">33</span>c
               </span>
               <span className="font-mono text-xs text-slate-500">
-                by sp33c
+                agentic coding · Jira
               </span>
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-500">
-              An autonomous, agentic Claude Opus coding agent that turns Jira
-              stories into reviewed pull requests.
+              sp33c builds agentic coding with Jira — an autonomous Claude Opus
+              agent that turns stories into reviewed pull requests, with Human
+              Override keeping you in command.
             </p>
           </div>
 
@@ -114,7 +115,7 @@ export function Footer() {
             </a>
             .
           </p>
-          <p className="font-mono">Built with Remix · Tailwind · Claude Opus</p>
+          <p className="font-mono">Agentic coding with Jira · sp33c · Nuremberg</p>
         </div>
       </div>
     </footer>

@@ -5,14 +5,18 @@ export function Hero() {
   return (
     <section
       id="top"
-      className="relative overflow-hidden border-b border-white/5"
+      className="relative min-h-screen overflow-hidden border-b border-white/5 bg-black"
     >
-      {/* Background glow + grid */}
+      {/* Background: deep black base, tight accent glow, grid, and a vignette */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-grid opacity-40 mask-fade-b" />
-        <div className="absolute left-1/2 top-[-10%] h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-accent/15 blur-[130px]" />
-        <div className="absolute right-[8%] top-[30%] h-[320px] w-[320px] rounded-full bg-accent-cyan/[0.07] blur-[100px]" />
-        <div className="absolute left-[6%] top-[50%] h-[280px] w-[280px] rounded-full bg-accent-violet/[0.07] blur-[100px]" />
+        {/* near-black radial base */}
+        <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_-10%,#0a0a16_0%,#040409_45%,#000000_100%)]" />
+        <div className="absolute inset-0 bg-grid opacity-[0.22] mask-fade-b" />
+        {/* one tight, saturated glow — sexier against the black */}
+        <div className="absolute left-1/2 top-[-12%] h-[560px] w-[760px] -translate-x-1/2 rounded-full bg-accent/20 blur-[140px]" />
+        <div className="absolute right-[10%] top-[34%] h-[300px] w-[300px] rounded-full bg-accent-violet/[0.10] blur-[120px]" />
+        {/* edge vignette for depth */}
+        <div className="absolute inset-0 bg-[radial-gradient(100%_100%_at_50%_40%,transparent_55%,rgba(0,0,0,0.85)_100%)]" />
       </div>
 
       <div className="relative mx-auto grid max-w-7xl gap-12 px-4 pb-20 pt-28 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-8 lg:px-8 lg:pb-28 lg:pt-36">
@@ -24,13 +28,13 @@ export function Hero() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-lime opacity-75" />
                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent-lime" />
               </span>
-              Agentic AI · Claude Opus · PR-gated
+              sp<span className="text-accent-lime">33</span>c · Agentic coding · Human Override
             </span>
           </Reveal>
 
           <Reveal delay={80}>
             <h1 className="mt-6 text-balance text-5xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl">
-              Code as spec.
+              Agentic coding.
               <br />
               <span className="text-gradient">Driven by Jira.</span>
             </h1>
@@ -41,8 +45,11 @@ export function Hero() {
               Write the story. Label it{" "}
               <LabelPill tone="ready">#ready</LabelPill>. An autonomous Claude
               Opus agent picks it up, implements it, runs tests and QA, and
-              opens a pull request — your spec becomes shipped code while you
-              stay in review.
+              opens a pull request — your spec becomes shipped code. With{" "}
+              <a href="#loop" className="font-medium text-violet-300 underline decoration-dotted underline-offset-2 hover:text-violet-200">
+                Human Override
+              </a>
+              , a human stays in command of every irreversible step.
             </p>
           </Reveal>
 
@@ -60,13 +67,8 @@ export function Hero() {
                   />
                 </svg>
               </a>
-              <a
-                href="https://github.com/afitterling/jira-coding-agent"
-                target="_blank"
-                rel="noreferrer"
-                className="btn-ghost"
-              >
-                Read the source
+              <a href="#loop" className="btn-ghost">
+                Human Override
               </a>
             </div>
           </Reveal>
@@ -97,19 +99,6 @@ export function Hero() {
         </Reveal>
       </div>
 
-      {/* Scroll indicator — hints there's more below the fold */}
-      <a
-        href="#how"
-        aria-label="Scroll to see how it works"
-        className="group absolute inset-x-0 bottom-6 z-10 mx-auto flex w-fit flex-col items-center gap-2 text-slate-500 transition-colors hover:text-slate-200"
-      >
-        <span className="font-mono text-[11px] uppercase tracking-[0.2em]">
-          Scroll
-        </span>
-        <span className="flex h-9 w-5 items-start justify-center rounded-full border border-white/20 p-1 group-hover:border-white/40">
-          <span className="h-2 w-1 animate-scroll-dot rounded-full bg-current" />
-        </span>
-      </a>
     </section>
   );
 }

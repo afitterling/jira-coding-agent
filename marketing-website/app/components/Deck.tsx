@@ -87,6 +87,42 @@ export function Deck() {
     };
   }, [ids, current, goTo]);
 
+  // Mouse-wheel navigation: one gesture = one section. Tall sections still
+  // scroll natively until you reach their edge, then the wheel jumps.
+  useEffect(() => {
+    if (ids.length < 2) return;
+    let locked = false;
+    const onWheel = (e: WheelEvent) => {
+      if (locked) {
+        e.preventDefault();
+        return;
+      }
+      const el = elements()[current];
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const EPS = 6;
+      const down = e.deltaY > 0;
+      if (down) {
+        if (rect.bottom > vh + EPS) return; // more of this section to read
+        if (current >= ids.length - 1) return;
+        e.preventDefault();
+        locked = true;
+        goTo(current + 1);
+        window.setTimeout(() => (locked = false), 850);
+      } else {
+        if (rect.top < -EPS) return; // more of this section above
+        if (current <= 0) return;
+        e.preventDefault();
+        locked = true;
+        goTo(current - 1);
+        window.setTimeout(() => (locked = false), 850);
+      }
+    };
+    window.addEventListener("wheel", onWheel, { passive: false });
+    return () => window.removeEventListener("wheel", onWheel);
+  }, [ids, current, elements, goTo]);
+
   if (!mounted || ids.length < 2) return null;
   const atStart = current <= 0;
   const atEnd = current >= ids.length - 1;
@@ -119,10 +155,10 @@ export function Deck() {
         ))}
       </nav>
 
-      {/* Bottom-right counter + prev/next */}
+      {/* Bottom-right counter + prev/next handle (always visible) */}
       <div
         data-no-advance
-        className="fixed bottom-5 right-5 z-40 flex items-center gap-2 rounded-full border border-white/10 bg-ink-900/80 px-2 py-1.5 backdrop-blur-xl"
+        className="fixed bottom-5 right-5 z-40 flex items-center gap-1 rounded-full border border-white/10 bg-ink-900/80 px-2 py-1.5 shadow-card backdrop-blur-xl"
       >
         <button
           type="button"
@@ -133,7 +169,7 @@ export function Deck() {
         >
           <Chevron dir="up" />
         </button>
-        <span className="select-none font-mono text-xs tabular-nums text-slate-400">
+        <span className="select-none px-1 font-mono text-xs tabular-nums text-slate-400">
           {String(current + 1).padStart(2, "0")}
           <span className="text-slate-600"> / {String(ids.length).padStart(2, "0")}</span>
         </span>
@@ -142,19 +178,25 @@ export function Deck() {
           aria-label="Next section"
           disabled={atEnd}
           onClick={() => goTo(current + 1)}
-          className="grid h-7 w-7 place-items-center rounded-full text-slate-400 transition-colors enabled:hover:bg-white/10 enabled:hover:text-white disabled:opacity-30"
+          className="flex items-center gap-1 rounded-full bg-accent/90 px-3 py-1 text-xs font-semibold text-white transition-colors enabled:hover:bg-accent disabled:opacity-30"
         >
+          Next
           <Chevron dir="down" />
         </button>
       </div>
 
-      {/* First-run hint */}
+      {/* First-run hint — prominent, animated, until the first advance */}
       {!hintGone && !atEnd && (
         <div
           data-no-advance
-          className="pointer-events-none fixed bottom-6 left-1/2 z-40 -translate-x-1/2 rounded-full border border-white/10 bg-ink-900/70 px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-slate-400 backdrop-blur-xl"
+          className="pointer-events-none fixed bottom-10 left-1/2 z-40 flex -translate-x-1/2 flex-col items-center gap-2"
         >
-          Click anywhere or press <span className="text-accent">→</span> to advance
+          <span className="rounded-full border border-accent/40 bg-ink-900/85 px-4 py-2 text-center font-mono text-xs uppercase tracking-[0.18em] text-slate-200 shadow-glow backdrop-blur-xl">
+            Click anywhere · press <span className="text-accent">↓</span> · or scroll to explore
+          </span>
+          <span className="grid h-8 w-8 animate-bounce place-items-center rounded-full border border-accent/40 bg-ink-900/85 text-accent backdrop-blur-xl">
+            <Chevron dir="down" />
+          </span>
         </div>
       )}
     </>

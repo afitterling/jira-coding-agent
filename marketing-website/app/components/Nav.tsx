@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 const LINKS = [
   { href: "#how", label: "How it works" },
-  { href: "#loop", label: "Human-in-the-loop" },
+  { href: "#loop", label: "Human Override" },
   { href: "#diagrams", label: "Diagrams" },
   { href: "#features", label: "Features" },
   { href: "#about", label: "About" },
@@ -35,8 +35,10 @@ export function Nav() {
             {"</>"}
           </span>
           <span className="font-mono text-sm font-semibold tracking-tight text-slate-100">
-            code<span className="text-accent">·</span>as
-            <span className="text-slate-500">·</span>spec
+            sp<span className="text-accent">33</span>c
+          </span>
+          <span className="hidden font-mono text-xs text-slate-500 sm:inline">
+            agentic coding · Jira
           </span>
         </a>
 
