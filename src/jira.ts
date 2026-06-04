@@ -1,4 +1,4 @@
-import { config } from "./config.js";
+import type { JiraAuth } from "./config.js";
 
 export interface Story {
   key: string;
@@ -7,31 +7,6 @@ export interface Story {
   description: string;
   labels: string[];
   status: string;
-}
-
-const base = () => `https://${config.jira.host}/rest/api/3`;
-
-function authHeader(): string {
-  // Jira Cloud: Basic auth with email:apiToken.
-  const raw = `${config.jira.email}:${config.jira.token}`;
-  return "Basic " + Buffer.from(raw).toString("base64");
-}
-
-async function call(path: string, init?: RequestInit): Promise<Response> {
-  const res = await fetch(`${base()}${path}`, {
-    ...init,
-    headers: {
-      Authorization: authHeader(),
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      ...(init?.headers ?? {}),
-    },
-  });
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`Jira ${init?.method ?? "GET"} ${path} -> ${res.status} ${body}`);
-  }
-  return res;
 }
 
 /** Flatten an Atlassian Document Format (ADF) node tree to plain text. */
@@ -55,78 +30,91 @@ function textToAdf(text: string) {
   };
 }
 
-/** Search the board via JQL using the current bulk endpoint. */
-export async function searchStories(jql: string, maxResults = 50): Promise<Story[]> {
-  const res = await call(`/search/jql`, {
-    method: "POST",
-    body: JSON.stringify({
-      jql,
-      maxResults,
-      fields: ["summary", "description", "labels", "status"],
-    }),
-  });
-  const data = (await res.json()) as { issues?: any[] };
-  return (data.issues ?? []).map((i) => ({
-    key: i.key,
-    id: i.id,
-    summary: i.fields?.summary ?? "",
-    description: adfToText(i.fields?.description).trim(),
-    labels: (i.fields?.labels ?? []) as string[],
-    status: i.fields?.status?.name ?? "",
-  }));
-}
-
-/** Atomically add/remove labels on an issue. */
-export async function updateLabels(
-  key: string,
-  add: string[] = [],
-  remove: string[] = [],
-): Promise<void> {
-  const update = {
-    labels: [
-      ...add.map((name) => ({ add: name })),
-      ...remove.map((name) => ({ remove: name })),
-    ],
-  };
-  await call(`/issue/${key}`, { method: "PUT", body: JSON.stringify({ update }) });
-}
-
-/** Post a comment (used to "notify" the revised spec / generated implementation). */
-export async function addComment(key: string, text: string): Promise<void> {
-  await call(`/issue/${key}/comment`, {
-    method: "POST",
-    body: JSON.stringify({ body: textToAdf(text) }),
-  });
-}
-
-/** List the workflow transitions currently available on an issue. */
-export async function getTransitions(
-  key: string,
-): Promise<Array<{ id: string; name: string; to: string }>> {
-  const res = await call(`/issue/${key}/transitions`);
-  const data = (await res.json()) as { transitions?: any[] };
-  return (data.transitions ?? []).map((t) => ({
-    id: t.id,
-    name: t.name,
-    to: t.to?.name ?? "",
-  }));
-}
-
 /**
- * Move an issue to a target workflow status by name (native Jira flow).
- * Matches the target status, falling back to a transition whose own name matches.
- * Returns true if a transition was performed.
+ * A Jira client bound to one tenant's credentials. Each tenant gets its own
+ * client instance — credentials never cross tenant boundaries.
  */
-export async function transitionTo(key: string, statusName: string): Promise<boolean> {
-  const transitions = await getTransitions(key);
-  const wanted = statusName.toLowerCase();
-  const match =
-    transitions.find((t) => t.to.toLowerCase() === wanted) ??
-    transitions.find((t) => t.name.toLowerCase() === wanted);
-  if (!match) return false; // already there, or no valid transition from current status
-  await call(`/issue/${key}/transitions`, {
-    method: "POST",
-    body: JSON.stringify({ transition: { id: match.id } }),
-  });
-  return true;
+export function createJira(auth: JiraAuth) {
+  const base = `https://${auth.host}/rest/api/3`;
+  const authHeader = "Basic " + Buffer.from(`${auth.email}:${auth.token}`).toString("base64");
+
+  async function call(path: string, init?: RequestInit): Promise<Response> {
+    const res = await fetch(`${base}${path}`, {
+      ...init,
+      headers: {
+        Authorization: authHeader,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        ...(init?.headers ?? {}),
+      },
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      throw new Error(`Jira ${init?.method ?? "GET"} ${path} -> ${res.status} ${body}`);
+    }
+    return res;
+  }
+
+  return {
+    /** Search the board via JQL using the current bulk endpoint. */
+    async searchStories(jql: string, maxResults = 50): Promise<Story[]> {
+      const res = await call(`/search/jql`, {
+        method: "POST",
+        body: JSON.stringify({
+          jql,
+          maxResults,
+          fields: ["summary", "description", "labels", "status"],
+        }),
+      });
+      const data = (await res.json()) as { issues?: any[] };
+      return (data.issues ?? []).map((i) => ({
+        key: i.key,
+        id: i.id,
+        summary: i.fields?.summary ?? "",
+        description: adfToText(i.fields?.description).trim(),
+        labels: (i.fields?.labels ?? []) as string[],
+        status: i.fields?.status?.name ?? "",
+      }));
+    },
+
+    /** Atomically add/remove labels on an issue. */
+    async updateLabels(key: string, add: string[] = [], remove: string[] = []): Promise<void> {
+      const update = {
+        labels: [...add.map((name) => ({ add: name })), ...remove.map((name) => ({ remove: name }))],
+      };
+      await call(`/issue/${key}`, { method: "PUT", body: JSON.stringify({ update }) });
+    },
+
+    /** Post a comment — used to "notify" specs/implementations and to stream runner logs. */
+    async addComment(key: string, text: string): Promise<void> {
+      await call(`/issue/${key}/comment`, {
+        method: "POST",
+        body: JSON.stringify({ body: textToAdf(text) }),
+      });
+    },
+
+    /** List the workflow transitions currently available on an issue. */
+    async getTransitions(key: string): Promise<Array<{ id: string; name: string; to: string }>> {
+      const res = await call(`/issue/${key}/transitions`);
+      const data = (await res.json()) as { transitions?: any[] };
+      return (data.transitions ?? []).map((t) => ({ id: t.id, name: t.name, to: t.to?.name ?? "" }));
+    },
+
+    /** Move an issue to a target workflow status by name. Returns true if it transitioned. */
+    async transitionTo(key: string, statusName: string): Promise<boolean> {
+      const transitions = await this.getTransitions(key);
+      const wanted = statusName.toLowerCase();
+      const match =
+        transitions.find((t) => t.to.toLowerCase() === wanted) ??
+        transitions.find((t) => t.name.toLowerCase() === wanted);
+      if (!match) return false;
+      await call(`/issue/${key}/transitions`, {
+        method: "POST",
+        body: JSON.stringify({ transition: { id: match.id } }),
+      });
+      return true;
+    },
+  };
 }
+
+export type Jira = ReturnType<typeof createJira>;

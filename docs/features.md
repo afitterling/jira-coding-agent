@@ -8,9 +8,11 @@ for the full diagram.
 
 | Component | Tech | Purpose | Status |
 |-----------|------|---------|--------|
-| **Agent cron** | `sst.aws.Cron` (`rate(2 minutes)`) → Lambda | Docks Jira, runs the pipeline each tick | ✅ Available |
-| **Run log** | `sst.aws.Dynamo` | Persists per-run summaries + events | ✅ Available |
-| **Dashboard** | `sst.aws.Remix` | Visualizes runs/events, auto-refresh 15s | ✅ Available |
+| **Agent cron** | `sst.aws.Cron` (`rate(2 minutes)`) → Lambda | Docks each tenant's Jira, runs the pipeline | ✅ Available |
+| **Run log** | `sst.aws.Dynamo` (tenant-prefixed keys) | Per-run summaries + events | ✅ Available |
+| **Coding runner** | `sst.aws.Task` (Fargate) + Claude Code CLI | Isolated per-story agent: clone → code → test → PR (`EXECUTE_MODE=fargate`) | ✅ Available |
+| **Dashboard** | `sst.aws.Remix` | Visualizes runs/events per tenant, auto-refresh 15s | ✅ Available |
+| **Multi-tenancy** | per-tenant clients + per-task microVM | Isolated data/creds/compute — see [tenant-isolation.md](tenant-isolation.md) | ✅ Available |
 | **Auth/login** | — | UI auth for the dashboard | 🚧 Not yet (public) |
 
 ## Pipeline steps

@@ -15,18 +15,29 @@ See [`docs/system-flow.svg`](docs/system-flow.svg) and [`docs/features.md`](docs
 ┌────────────┐   rate(2m)   ┌──────────────┐   pull/label/comment   ┌──────────┐
 │ Cron       │ ───────────▶ │ Agent Lambda │ ─────────────────────▶ │  Jira    │
 └────────────┘              │  src/agent   │ ◀───────────────────── │  Cloud   │
-                            └──────┬───────┘        stories          └──────────┘
-                                   │ run + event log
-                                   ▼
-                            ┌──────────────┐        reads          ┌──────────────┐
-                            │ DynamoDB     │ ◀──────────────────── │ Remix dash   │
-                            │  "Runs"      │                       │  (web/)      │
-                            └──────────────┘                       └──────────────┘
+                            └──┬────────┬──┘        stories          └────▲─────┘
+              run+event log    │        │ dispatch (#ready)               │ PR + logs
+                               ▼        ▼                                 │
+                       ┌──────────┐  ┌──────────────────┐                 │
+              reads    │ DynamoDB │  │ Fargate Runner   │ clone→code→test→PR
+   ┌──────────────┐◀───│  "Runs"  │  │ (Claude Code CLI)│─────────────────┘
+   │ Remix dash   │    └──────────┘  └──────────────────┘
+   │  (web/)      │      tenant-prefixed keys · one task per story (isolated microVM)
+   └──────────────┘
 ```
 
-- `src/` — agent core: Jira client, Claude prompts, DynamoDB run log, cron handler.
-- `web/` — Remix dashboard visualizing runs and their event logs (auto-refresh 15s).
-- `sst.config.ts` — Cron, DynamoDB table, and Remix site, linked together.
+- `src/` — agent core: per-tenant Jira client, Claude prompts, DynamoDB run log, cron handler.
+- `runner/` — isolated Fargate task: Claude Code CLI clones the repo, implements, tests, opens a PR.
+- `web/` — Remix dashboard visualizing runs per tenant (auto-refresh 15s).
+- `sst.config.ts` — Cron, DynamoDB, VPC/Cluster/Task runner, and Remix site, linked together.
+
+### Execute modes
+- `EXECUTE_MODE=inline` (default) — generate the implementation in-process, post as a Jira comment.
+- `EXECUTE_MODE=fargate` — dispatch an isolated runner per story (real code + PR). Needs `TARGET_REPO` + `GITHUB_TOKEN`.
+
+### Multi-tenant
+One deployment can serve many Jira sites with isolated data/credentials/compute.
+Set `TENANTS` (JSON) + `TENANT_IDS`. See [`docs/tenant-isolation.md`](docs/tenant-isolation.md).
 
 ## Setup
 

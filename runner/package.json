@@ -1,0 +1,12 @@
+{
+  "name": "runner",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@anthropic-ai/claude-code": "latest",
+    "@aws-sdk/client-dynamodb": "^3.700.0",
+    "@aws-sdk/lib-dynamodb": "^3.700.0",
+    "sst": "^4.15.0"
+  }
+}

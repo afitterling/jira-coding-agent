@@ -1,10 +1,6 @@
 import { Resource } from "sst";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import {
-  DynamoDBDocumentClient,
-  PutCommand,
-  QueryCommand,
-} from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 
 const doc = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const TABLE = Resource.Runs.name;
@@ -21,6 +17,7 @@ export interface RunEvent {
 }
 
 export interface RunSummary {
+  tenantId: string;
   runId: string;
   startedAt: string;
   finishedAt?: string;
@@ -35,16 +32,25 @@ export interface RunSummary {
 
 type Counter = "fetched" | "revised" | "implemented" | "tested" | "qaPassed" | "errors";
 
-/** A single agent run. Owns event logging + final summary, both persisted to DynamoDB. */
+// --- Tenant-isolated key scheme -------------------------------------------------
+// Every item is prefixed by tenant, so one tenant can never read another's runs
+// via the dashboard's queries. (Defence-in-depth alongside per-tenant credentials.)
+const runsPk = (tenantId: string) => `T#${tenantId}#RUN`;
+const eventsPk = (tenantId: string, runId: string) => `T#${tenantId}#RUN#${runId}`;
+
+/** A single agent run, scoped to one tenant. */
 export class Run {
   readonly runId: string;
   private seq = 0;
   private summary: RunSummary;
 
-  constructor(now: string) {
-    // runId sorts lexicographically by time; seq disambiguates same-ms runs.
+  constructor(
+    readonly tenantId: string,
+    now: string,
+  ) {
     this.runId = `${now}-${Math.floor(performance.now()).toString(36)}`;
     this.summary = {
+      tenantId,
       runId: this.runId,
       startedAt: now,
       status: "running",
@@ -61,21 +67,15 @@ export class Run {
     this.summary[field] += by;
   }
 
-  async log(
-    stage: Stage,
-    level: Level,
-    message: string,
-    issueKey?: string,
-  ): Promise<void> {
+  async log(stage: Stage, level: Level, message: string, issueKey?: string): Promise<void> {
     const ts = new Date().toISOString();
     if (level === "error") this.summary.errors += 1;
-    // Mirror to CloudWatch as well as the dashboard table.
-    console.log(`[${stage}/${level}]${issueKey ? ` ${issueKey}` : ""} ${message}`);
+    console.log(`[${this.tenantId}][${stage}/${level}]${issueKey ? ` ${issueKey}` : ""} ${message}`);
     await doc.send(
       new PutCommand({
         TableName: TABLE,
         Item: {
-          pk: `RUN#${this.runId}`,
+          pk: eventsPk(this.tenantId, this.runId),
           sk: `${ts}#${(this.seq++).toString().padStart(4, "0")}`,
           ts,
           level,
@@ -93,20 +93,19 @@ export class Run {
     await doc.send(
       new PutCommand({
         TableName: TABLE,
-        // pk constant so the dashboard can list recent runs in one query.
-        Item: { pk: "RUN", sk: this.runId, ...this.summary },
+        Item: { pk: runsPk(this.tenantId), sk: this.runId, ...this.summary },
       }),
     );
   }
 }
 
-/** Dashboard helper: list the most recent runs (newest first). */
-export async function recentRuns(limit = 25): Promise<RunSummary[]> {
+/** Dashboard helper: most recent runs for one tenant (newest first). */
+export async function recentRuns(tenantId: string, limit = 25): Promise<RunSummary[]> {
   const res = await doc.send(
     new QueryCommand({
       TableName: TABLE,
       KeyConditionExpression: "pk = :pk",
-      ExpressionAttributeValues: { ":pk": "RUN" },
+      ExpressionAttributeValues: { ":pk": runsPk(tenantId) },
       ScanIndexForward: false,
       Limit: limit,
     }),
@@ -114,13 +113,13 @@ export async function recentRuns(limit = 25): Promise<RunSummary[]> {
   return (res.Items ?? []) as RunSummary[];
 }
 
-/** Dashboard helper: fetch all events for one run (chronological). */
-export async function runEvents(runId: string): Promise<RunEvent[]> {
+/** Dashboard helper: all events for one run of one tenant. */
+export async function runEvents(tenantId: string, runId: string): Promise<RunEvent[]> {
   const res = await doc.send(
     new QueryCommand({
       TableName: TABLE,
       KeyConditionExpression: "pk = :pk",
-      ExpressionAttributeValues: { ":pk": `RUN#${runId}` },
+      ExpressionAttributeValues: { ":pk": eventsPk(tenantId, runId) },
       ScanIndexForward: true,
     }),
   );

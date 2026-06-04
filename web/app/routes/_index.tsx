@@ -1,13 +1,16 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData, useRevalidator, useSearchParams } from "@remix-run/react";
 import { useEffect } from "react";
-import { recentRuns, runEvents, type RunEvent, type RunSummary } from "~/lib/runs.server";
+import { recentRuns, runEvents, tenants, type RunEvent, type RunSummary } from "~/lib/runs.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const runs = await recentRuns(25);
-  const selected = new URL(request.url).searchParams.get("run") ?? runs[0]?.runId;
-  const events = selected ? await runEvents(selected) : [];
-  return json({ runs, selected, events });
+  const url = new URL(request.url);
+  const tenantList = tenants();
+  const tenant = url.searchParams.get("tenant") ?? tenantList[0] ?? "default";
+  const runs = await recentRuns(tenant, 25);
+  const selected = url.searchParams.get("run") ?? runs[0]?.runId;
+  const events = selected ? await runEvents(tenant, selected) : [];
+  return json({ tenants: tenantList, tenant, runs, selected, events });
 }
 
 const LEVEL_COLOR: Record<string, string> = {
@@ -27,7 +30,7 @@ function fmt(ts?: string) {
 }
 
 export default function Dashboard() {
-  const { runs, selected, events } = useLoaderData<typeof loader>();
+  const { tenants: tenantList, tenant, runs, selected, events } = useLoaderData<typeof loader>();
   const revalidator = useRevalidator();
   const [, setParams] = useSearchParams();
 
@@ -44,6 +47,30 @@ export default function Dashboard() {
         <span style={{ color: "#64748b", fontSize: 13 }}>
           cron every 2 min · auto-refresh 15s
         </span>
+        <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
+          <label htmlFor="tenant" style={{ color: "#64748b", fontSize: 13 }}>
+            tenant
+          </label>
+          <select
+            id="tenant"
+            value={tenant}
+            onChange={(e) => setParams({ tenant: e.target.value })}
+            style={{
+              background: "#111827",
+              color: "#e2e8f0",
+              border: "1px solid #1e293b",
+              borderRadius: 8,
+              padding: "4px 8px",
+              fontSize: 13,
+            }}
+          >
+            {tenantList.map((t: string) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+        </span>
       </header>
 
       <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: 24, marginTop: 24 }}>
@@ -55,7 +82,7 @@ export default function Dashboard() {
             {runs.map((r: RunSummary) => (
               <button
                 key={r.runId}
-                onClick={() => setParams({ run: r.runId })}
+                onClick={() => setParams({ tenant, run: r.runId })}
                 style={{
                   ...card,
                   textAlign: "left",

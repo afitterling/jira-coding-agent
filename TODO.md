@@ -19,12 +19,24 @@ Roadmap for the Jira coding agent. Checked = shipped.
 - [ ] Persist generated tests to the repo / PR instead of only commenting.
 
 ## Execute sub-flow hardening
-- [ ] Check out the target repo, apply the generated code, open a real PR
-      (GitHub) instead of posting code as a Jira comment.
-- [ ] Link PR URL back onto the story and into the dashboard.
+- [x] Isolated Fargate runner (`sst.aws.Task`) that clones the repo, drives the
+      **Claude Code CLI** (Opus), runs tests, and opens a real GitHub PR
+      (`EXECUTE_MODE=fargate`).
+- [x] Runner streams progress back to Jira as comments + the run log.
+- [x] `agent-dispatched` label prevents double-dispatch; cleared on done/fail.
+- [ ] Verify the runner end-to-end against a live repo (needs AWS deploy).
+- [ ] Surface the PR URL as a first-class field in the dashboard (not just a log line).
+
+## Multi-tenancy — see docs/tenant-isolation.md
+- [x] Per-tenant Jira clients (`createJira(auth)`); creds never shared.
+- [x] Tenant-prefixed DynamoDB keys (`T#<tenant>#…`); dashboard tenant selector.
+- [x] Per-story isolated Fargate task (own microVM + scoped creds).
+- [ ] Resolve per-tenant tokens from Secrets Manager/SSM instead of inline `TENANTS`.
+- [ ] Optional per-tenant Anthropic key for usage isolation.
+- [ ] Parallelize tenants per cron tick (bounded concurrency) for large fleets.
 
 ## Dashboard
-- [ ] **Auth / login** (currently public — do before exposing).
+- [ ] **Auth / login** (currently public — anyone can switch tenant; do before exposing).
 - [ ] Manual "trigger run now" button (invoke the agent Lambda).
 - [ ] Per-story timeline view across runs.
 - [ ] Render the generated test cases / QA findings inline.

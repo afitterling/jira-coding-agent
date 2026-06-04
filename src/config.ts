@@ -6,32 +6,74 @@ function req(name: string): string {
   return v;
 }
 
-export const config = {
-  jira: {
-    // e.g. "your-org.atlassian.net" (no protocol)
-    host: req("JIRA_HOST").replace(/^https?:\/\//, "").replace(/\/$/, ""),
-    email: req("JIRA_EMAIL"),
-    token: req("JIRA_TOKEN"),
-    /** JQL used to "dock" the board. Defaults to label-scoped query. */
-    get jql(): string {
-      if (process.env.JIRA_JQL) return process.env.JIRA_JQL;
-      const { revise, ready, implemented, tested } = labels;
-      return (
-        `(labels in ("${revise}", "${ready}", "${implemented}", "${tested}"))` +
-        ` ORDER BY updated DESC`
-      );
+export interface JiraAuth {
+  host: string; // e.g. "your-org.atlassian.net" (no protocol)
+  email: string;
+  token: string;
+}
+
+/** A single isolated tenant: its own Jira site, credentials, board, and target repo. */
+export interface Tenant {
+  id: string;
+  jira: JiraAuth;
+  jql: string;
+  model: string;
+  /** Repo the agent operates on for this tenant (used by the Fargate runner). */
+  targetRepo?: string;
+}
+
+const normHost = (h: string) => h.replace(/^https?:\/\//, "").replace(/\/$/, "");
+
+function defaultJql(): string {
+  const { revise, ready, implemented, tested } = labels;
+  return `(labels in ("${revise}", "${ready}", "${implemented}", "${tested}")) ORDER BY updated DESC`;
+}
+
+/**
+ * Load tenants. Two modes:
+ *  - Multi-tenant: `TENANTS` env = JSON array of
+ *      { id, jiraHost, jiraEmail, jiraToken, jql?, model?, targetRepo? }
+ *  - Single-tenant (default): one tenant "default" from the JIRA_* / ANTHROPIC_* vars.
+ *
+ * Secrets are per-tenant — never shared across tenants. In production prefer
+ * resolving `jiraToken` from a per-tenant secret store (see docs/tenant-isolation.md).
+ */
+export function loadTenants(): Tenant[] {
+  const sharedModel = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
+  if (process.env.TENANTS) {
+    const raw = JSON.parse(process.env.TENANTS) as Array<Record<string, string>>;
+    return raw.map((t) => {
+      if (!t.id || !t.jiraHost || !t.jiraEmail || !t.jiraToken) {
+        throw new Error(`TENANTS entry missing id/jiraHost/jiraEmail/jiraToken: ${JSON.stringify(t)}`);
+      }
+      return {
+        id: t.id,
+        jira: { host: normHost(t.jiraHost), email: t.jiraEmail, token: t.jiraToken },
+        jql: t.jql || defaultJql(),
+        model: t.model || sharedModel,
+        targetRepo: t.targetRepo,
+      };
+    });
+  }
+  // Single-tenant fallback.
+  return [
+    {
+      id: process.env.TENANT_ID || "default",
+      jira: { host: normHost(req("JIRA_HOST")), email: req("JIRA_EMAIL"), token: req("JIRA_TOKEN") },
+      jql: process.env.JIRA_JQL || defaultJql(),
+      model: sharedModel,
+      targetRepo: process.env.TARGET_REPO,
     },
-    /**
-     * When true, the agent also drives the native Jira workflow by transitioning
-     * issues to the status mapped for each stage outcome (see `statusFor`).
-     * Label updates always happen; transitions are additive.
-     */
-    driveStatus: (process.env.JIRA_DRIVE_STATUS ?? "false") === "true",
-  },
-  anthropic: {
-    apiKey: req("ANTHROPIC_API_KEY"),
-    model: process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6",
-  },
+  ];
+}
+
+/** Shared (tenant-independent) config. */
+export const config = {
+  anthropic: { apiKey: req("ANTHROPIC_API_KEY") },
+  /** Drive native Jira workflow transitions in addition to labels. */
+  driveStatus: (process.env.JIRA_DRIVE_STATUS ?? "false") === "true",
+  /** "inline" = implement in-process; "fargate" = dispatch an isolated runner task. */
+  executeMode: (process.env.EXECUTE_MODE ?? "inline") as "inline" | "fargate",
 };
 
 /** Jira labels cannot contain `#` or spaces, so the `#revise` notation maps to plain tokens. */
@@ -41,6 +83,8 @@ export const labels = {
   revised: process.env.LABEL_REVISED ?? "revised",
   ready: process.env.LABEL_READY ?? "ready",
   implemented: process.env.LABEL_IMPLEMENTED ?? "implemented",
+  // dispatched: transient marker so a #ready story isn't re-dispatched while a runner works it.
+  dispatched: process.env.LABEL_DISPATCHED ?? "agent-dispatched",
   // --- testing sub-flow ---
   tested: process.env.LABEL_TESTED ?? "tested",
   testsFailed: process.env.LABEL_TESTS_FAILED ?? "tests-failed",
@@ -50,11 +94,6 @@ export const labels = {
   done: process.env.LABEL_DONE ?? "done",
 };
 
-/**
- * Maps a stage outcome to a native Jira workflow status name. Only used when
- * `config.jira.driveStatus` is true. Override any of these via env to match your
- * board's columns (e.g. STATUS_IMPLEMENTED="In Review").
- */
 export type Outcome =
   | "revised"
   | "implemented"
@@ -63,6 +102,7 @@ export type Outcome =
   | "qaPassed"
   | "qaFailed";
 
+/** Maps a stage outcome to a native Jira workflow status name (used when driveStatus). */
 export function statusFor(outcome: Outcome): string | undefined {
   const map: Record<Outcome, string | undefined> = {
     revised: process.env.STATUS_REVISED,
