@@ -26,12 +26,36 @@ for the full diagram.
 | 6 | **Label implemented** — add `#implemented`, open PR / push branch | work complete | `#implemented` story + PR | ✅ Available |
 | 7 | **Report** — post summary back to Jira / Slack | loop done | run summary | ✅ Available |
 
-## Coming soon
+## Sub-flows
 
-| Step | Description | Status |
-|------|-------------|--------|
-| **QA** | Automated QA pass on implemented stories — validate against acceptance criteria, sanity-check generated code, flag regressions before merge | 🚧 Coming soon |
-| **Testing** | Generate and run unit / integration tests for each implemented story; gate `#implemented` on a green test suite | 🚧 Coming soon |
+After `#implemented`, stories flow through two gates. See
+[`testing-flow.svg`](testing-flow.svg) and [`qa-flow.svg`](qa-flow.svg).
 
-> **Note:** Until QA and Testing land, stories move to `#implemented` on code-work
-> completion only. Manual review is recommended before merging the opened PRs.
+### 🧪 Testing sub-flow ([diagram](testing-flow.mmd))
+
+| Step | Trigger | Pass → | Fail → | Status |
+|------|---------|--------|--------|--------|
+| Derive test cases from acceptance criteria, judge implementation | `#implemented` (not `#tested`/`#tests-failed`) | `#tested` | `#tests-failed` | ✅ Available (spec-level gate; real exec → TODO) |
+
+### 🔍 QA sub-flow ([diagram](qa-flow.mmd))
+
+| Step | Trigger | Pass → | Fail → | Status |
+|------|---------|--------|--------|--------|
+| Validate completeness, edge cases, regressions | `#tested` (not `#qa-passed`/`#qa-failed`) | `#qa-passed` + `#done` | `#qa-failed` (removes `#tested`) | ✅ Available |
+
+## Label ↔ Jira workflow mapping
+
+The pipeline is label-driven by default. Set `JIRA_DRIVE_STATUS=true` to *also*
+transition issues across your native Jira workflow (additive — labels still apply).
+
+| Outcome | Label(s) | Jira status (default, override via env) |
+|---------|----------|------------------------------------------|
+| revised | `revised` (−`undone`) | `STATUS_REVISED` (unset) |
+| implemented | `implemented` | `In Review` |
+| tested | `tested` | `In QA` |
+| tests failed | `tests-failed` | `In Progress` |
+| qa passed | `qa-passed` + `done` | `Done` |
+| qa failed | `qa-failed` (−`tested`) | `In Progress` |
+
+> Transitions only fire if the target status is reachable from the issue's current
+> status in your workflow; otherwise the agent logs a warning and continues.

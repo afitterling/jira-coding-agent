@@ -1,0 +1,26 @@
+%%{init: {'theme':'base','themeVariables':{'fontFamily':'Inter, sans-serif','primaryColor':'#eef2ff','primaryBorderColor':'#6366f1','lineColor':'#94a3b8','primaryTextColor':'#1e293b'}}}%%
+flowchart TD
+    In([From testing sub-flow]) --> Gate
+
+    Gate{"Has #tested<br/>AND NOT #qa-passed<br/>AND NOT #qa-failed ?"}
+    Gate -- No --> Skip[Skip — nothing to QA]
+    Gate -- Yes --> Review["QA review (LLM)<br/>validate vs acceptance criteria"]
+
+    Review --> Checks["Check: completeness ·<br/>edge cases · regressions"]
+    Checks --> Verdict{Ready to<br/>ship?}
+
+    Verdict -- Yes --> Pass["Comment 🔍 PASS<br/>add #qa-passed + #done<br/>(status → Done)"]
+    Verdict -- No --> Fail["Comment 🔍 FAIL + findings<br/>add #qa-failed, remove #tested<br/>(status → In Progress)"]
+
+    Pass --> Shipped([✅ Done])
+    Fail --> Rework([→ back to dev / re-test])
+
+    classDef action fill:#dcfce7,stroke:#22c55e,color:#14532d;
+    classDef decision fill:#f3e8ff,stroke:#a855f7,color:#581c87;
+    classDef terminal fill:#1e293b,stroke:#0f172a,color:#f8fafc;
+    classDef warn fill:#fee2e2,stroke:#ef4444,color:#7f1d1d;
+
+    class Review,Checks,Pass action;
+    class Fail warn;
+    class Gate,Verdict decision;
+    class In,Shipped,Rework,Skip terminal;

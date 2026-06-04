@@ -10,7 +10,7 @@ const doc = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const TABLE = Resource.Runs.name;
 
 export type Level = "info" | "success" | "warn" | "error";
-export type Stage = "fetch" | "revise" | "execute" | "done";
+export type Stage = "fetch" | "revise" | "execute" | "testing" | "qa" | "done";
 
 export interface RunEvent {
   ts: string;
@@ -28,8 +28,12 @@ export interface RunSummary {
   fetched: number;
   revised: number;
   implemented: number;
+  tested: number;
+  qaPassed: number;
   errors: number;
 }
+
+type Counter = "fetched" | "revised" | "implemented" | "tested" | "qaPassed" | "errors";
 
 /** A single agent run. Owns event logging + final summary, both persisted to DynamoDB. */
 export class Run {
@@ -47,11 +51,13 @@ export class Run {
       fetched: 0,
       revised: 0,
       implemented: 0,
+      tested: 0,
+      qaPassed: 0,
       errors: 0,
     };
   }
 
-  count(field: "fetched" | "revised" | "implemented" | "errors", by = 1) {
+  count(field: Counter, by = 1) {
     this.summary[field] += by;
   }
 

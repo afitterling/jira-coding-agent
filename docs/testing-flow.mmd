@@ -1,0 +1,27 @@
+%%{init: {'theme':'base','themeVariables':{'fontFamily':'Inter, sans-serif','primaryColor':'#eef2ff','primaryBorderColor':'#6366f1','lineColor':'#94a3b8','primaryTextColor':'#1e293b'}}}%%
+flowchart TD
+    In([From execute stage]) --> Gate
+
+    Gate{"Has #implemented<br/>AND NOT #tested<br/>AND NOT #tests-failed ?"}
+    Gate -- No --> Skip[Skip — nothing to test]
+    Gate -- Yes --> Read["Read implementation notes<br/>+ acceptance criteria"]
+
+    Read --> Derive["Derive test cases (LLM)<br/>cover each acceptance criterion"]
+    Derive --> Run["Run tests<br/>(CI / Vercel Sandbox — see TODO)"]
+    Run --> Verdict{All critical<br/>cases pass?}
+
+    Verdict -- Yes --> Pass["Comment 🧪 PASS + cases<br/>add #tested<br/>(status → In QA)"]
+    Verdict -- No --> Fail["Comment 🧪 FAIL + gaps<br/>add #tests-failed<br/>(status → In Progress)"]
+
+    Pass --> ToQA([→ QA sub-flow])
+    Fail --> Rework([→ back to dev / #ready])
+
+    classDef action fill:#dcfce7,stroke:#22c55e,color:#14532d;
+    classDef decision fill:#f3e8ff,stroke:#a855f7,color:#581c87;
+    classDef terminal fill:#1e293b,stroke:#0f172a,color:#f8fafc;
+    classDef warn fill:#fee2e2,stroke:#ef4444,color:#7f1d1d;
+
+    class Read,Derive,Run,Pass action;
+    class Fail warn;
+    class Gate,Verdict decision;
+    class In,ToQA,Rework,Skip terminal;

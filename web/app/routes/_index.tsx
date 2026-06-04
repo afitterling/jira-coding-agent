@@ -68,7 +68,8 @@ export default function Dashboard() {
                   <span style={{ color: "#64748b", fontSize: 12 }}>{fmt(r.startedAt)}</span>
                 </div>
                 <div style={{ marginTop: 6, fontSize: 13, color: "#94a3b8" }}>
-                  fetched {r.fetched} · revised {r.revised} · impl {r.implemented}
+                  fetched {r.fetched} · revised {r.revised} · impl {r.implemented} ·
+                  tested {r.tested ?? 0} · qa {r.qaPassed ?? 0}
                   {r.errors ? ` · ⚠ ${r.errors}` : ""}
                 </div>
               </button>

@@ -98,3 +98,35 @@ export async function addComment(key: string, text: string): Promise<void> {
     body: JSON.stringify({ body: textToAdf(text) }),
   });
 }
+
+/** List the workflow transitions currently available on an issue. */
+export async function getTransitions(
+  key: string,
+): Promise<Array<{ id: string; name: string; to: string }>> {
+  const res = await call(`/issue/${key}/transitions`);
+  const data = (await res.json()) as { transitions?: any[] };
+  return (data.transitions ?? []).map((t) => ({
+    id: t.id,
+    name: t.name,
+    to: t.to?.name ?? "",
+  }));
+}
+
+/**
+ * Move an issue to a target workflow status by name (native Jira flow).
+ * Matches the target status, falling back to a transition whose own name matches.
+ * Returns true if a transition was performed.
+ */
+export async function transitionTo(key: string, statusName: string): Promise<boolean> {
+  const transitions = await getTransitions(key);
+  const wanted = statusName.toLowerCase();
+  const match =
+    transitions.find((t) => t.to.toLowerCase() === wanted) ??
+    transitions.find((t) => t.name.toLowerCase() === wanted);
+  if (!match) return false; // already there, or no valid transition from current status
+  await call(`/issue/${key}/transitions`, {
+    method: "POST",
+    body: JSON.stringify({ transition: { id: match.id } }),
+  });
+  return true;
+}

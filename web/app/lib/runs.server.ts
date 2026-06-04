@@ -13,13 +13,15 @@ export interface RunSummary {
   fetched: number;
   revised: number;
   implemented: number;
+  tested: number;
+  qaPassed: number;
   errors: number;
 }
 
 export interface RunEvent {
   ts: string;
   level: "info" | "success" | "warn" | "error";
-  stage: "fetch" | "revise" | "execute" | "done";
+  stage: "fetch" | "revise" | "execute" | "testing" | "qa" | "done";
   message: string;
   issueKey?: string;
 }

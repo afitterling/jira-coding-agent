@@ -37,3 +37,59 @@ export function implementStory(story: Story): Promise<string> {
   const user = `Story ${story.key}: ${story.summary}\n\nSpecification:\n${story.description || "(empty)"}`;
   return complete(system, user, 3000);
 }
+
+export interface Verdict {
+  pass: boolean;
+  summary: string;
+  details: string;
+}
+
+/** Parse the first JSON object out of a model response. */
+async function completeJson(system: string, user: string, maxTokens = 2000): Promise<Verdict> {
+  const text = await complete(
+    system + " Respond with ONLY a JSON object: " +
+      '{"pass": boolean, "summary": string, "details": string}.',
+    user,
+    maxTokens,
+  );
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) return { pass: false, summary: "Unparseable verdict", details: text };
+  try {
+    const obj = JSON.parse(match[0]) as Partial<Verdict>;
+    return {
+      pass: Boolean(obj.pass),
+      summary: obj.summary ?? "",
+      details: obj.details ?? "",
+    };
+  } catch {
+    return { pass: false, summary: "Invalid JSON verdict", details: text };
+  }
+}
+
+/**
+ * Testing sub-flow: author tests for the implemented story and judge whether the
+ * implementation would pass them. (Real execution is delegated to CI / Vercel
+ * Sandbox — see TODO.md; this gate is the spec-level test review.)
+ */
+export function testStory(story: Story): Promise<Verdict> {
+  const system =
+    "You are a senior test engineer. Given a story and its implementation notes, derive the " +
+    "test cases that cover its acceptance criteria, then judge whether the described " +
+    "implementation satisfies them. `pass` = all critical cases satisfied. Put the test cases " +
+    "and any gaps in `details`.";
+  const user = `Story ${story.key}: ${story.summary}\n\nSpec/implementation:\n${story.description || "(empty)"}`;
+  return completeJson(system, user);
+}
+
+/**
+ * QA sub-flow: validate the tested story against its acceptance criteria from a
+ * product/UX standpoint — completeness, edge cases, regressions.
+ */
+export function qaReview(story: Story): Promise<Verdict> {
+  const system =
+    "You are a meticulous QA reviewer. Validate the story against its acceptance criteria: " +
+    "completeness, edge cases, and likely regressions. `pass` = ready to ship. List concrete " +
+    "findings in `details`.";
+  const user = `Story ${story.key}: ${story.summary}\n\nSpec:\n${story.description || "(empty)"}`;
+  return completeJson(system, user);
+}
