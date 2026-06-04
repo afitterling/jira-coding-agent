@@ -1,4 +1,5 @@
 import { About } from "~/components/About";
+import { DataConnectivity } from "~/components/DataConnectivity";
 import { Deck } from "~/components/Deck";
 import { Diagrams } from "~/components/Diagrams";
 import { Features } from "~/components/Features";
@@ -6,8 +7,10 @@ import { Footer } from "~/components/Footer";
 import { Hero } from "~/components/Hero";
 import { HowItWorks } from "~/components/HowItWorks";
 import { HumanLoop } from "~/components/HumanLoop";
+import { Interfaces } from "~/components/Interfaces";
 import { Nav } from "~/components/Nav";
 import { Screenshots } from "~/components/Screenshots";
+import { UseCases } from "~/components/UseCases";
 
 export default function Index() {
   return (
@@ -17,6 +20,9 @@ export default function Index() {
         <Hero />
         <HowItWorks />
         <HumanLoop />
+        <Interfaces />
+        <UseCases />
+        <DataConnectivity />
         <Diagrams />
         <Features />
         <Screenshots />

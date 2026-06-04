@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 const LINKS = [
   { href: "#how", label: "How it works" },
   { href: "#loop", label: "Human Override" },
-  { href: "#diagrams", label: "Diagrams" },
-  { href: "#features", label: "Features" },
+  { href: "#interfaces", label: "AI Models" },
+  { href: "#use-cases", label: "Use cases" },
+  { href: "#data", label: "Synapse" },
   { href: "#about", label: "About" },
 ];
 
