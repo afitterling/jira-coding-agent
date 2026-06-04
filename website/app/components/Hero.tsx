@@ -9,10 +9,10 @@ export function Hero() {
     >
       {/* Background glow + grid */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-grid opacity-60 mask-fade-b" />
-        <div className="absolute left-1/2 top-[-10%] h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-accent/20 blur-[120px]" />
-        <div className="absolute right-[8%] top-[30%] h-[320px] w-[320px] rounded-full bg-accent-cyan/10 blur-[100px]" />
-        <div className="absolute left-[6%] top-[50%] h-[280px] w-[280px] rounded-full bg-accent-violet/10 blur-[100px]" />
+        <div className="absolute inset-0 bg-grid opacity-40 mask-fade-b" />
+        <div className="absolute left-1/2 top-[-10%] h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-accent/15 blur-[130px]" />
+        <div className="absolute right-[8%] top-[30%] h-[320px] w-[320px] rounded-full bg-accent-cyan/[0.07] blur-[100px]" />
+        <div className="absolute left-[6%] top-[50%] h-[280px] w-[280px] rounded-full bg-accent-violet/[0.07] blur-[100px]" />
       </div>
 
       <div className="relative mx-auto grid max-w-7xl gap-12 px-4 pb-20 pt-28 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-8 lg:px-8 lg:pb-28 lg:pt-36">

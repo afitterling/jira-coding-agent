@@ -4,10 +4,12 @@ import { Reveal } from "~/components/Reveal";
 const FOCUS = [
   "Agentic & Generative AI",
   "AI Agents & Orchestration",
-  "LLMs & Prompt Engineering",
+  "LLMs, RAG & Prompt Engineering",
   "Security Architecture & Cyber Security",
-  "Cloud-native Engineering",
+  "Zero Trust & IAM",
+  "Cloud-native Engineering (AWS · Azure · GCP)",
   "Critical Infrastructure & KRITIS Energy",
+  "AI for Ethical Investing & Capital Markets",
 ];
 
 export function About() {
@@ -29,6 +31,11 @@ export function About() {
               Security, Security Architecture, AI, Cloud, and DevOps —
               designing and delivering secure, scalable solutions for private
               and public sector clients.
+            </p>
+            <p className="mt-4 leading-relaxed text-slate-400">
+              He has led cross-functional teams as a Solution Engineer, Security
+              Architect, Product Owner, and Scrum Master — working across
+              Switzerland, Singapore, Malaysia, and Germany.
             </p>
             <p className="mt-4 leading-relaxed text-slate-400">
               His focus on{" "}

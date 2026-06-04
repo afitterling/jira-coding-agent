@@ -152,7 +152,7 @@ function DashboardMock() {
           <span className="text-sm font-medium text-slate-200">
             Live runs
           </span>
-          <span className="font-mono text-xs text-slate-600">tenant: acme</span>
+          <span className="font-mono text-xs text-slate-600">tenant: sp33c</span>
         </div>
         <span className="font-mono text-[10px] text-slate-600">⟳ 15s</span>
       </div>
