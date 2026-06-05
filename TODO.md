@@ -1,52 +1,33 @@
 # TODO
 
-Roadmap for the Jira coding agent. Checked = shipped.
+Open tickets. (The previous detailed roadmap is preserved in git history.)
 
-## Core pipeline
-- [x] Dock Jira board (token from `.env.local`), JQL fetch
-- [x] Revise sub-flow (`#revise` + `#undone` → `#revised`)
-- [x] Execute sub-flow (`#ready` → `#implemented`)
-- [x] Cron every 2 min (SST `sst.aws.Cron`)
-- [x] DynamoDB run/event log + Remix dashboard
+## 1. Integrate AI coder in Jira flow
+**Status:** open
 
-## Testing & QA sub-flows
-- [x] Testing gate (`#implemented` → `#tested` | `#tests-failed`)
-- [x] QA gate (`#tested` → `#qa-passed` + `#done` | `#qa-failed`)
-- [x] Optional native Jira workflow transitions (`JIRA_DRIVE_STATUS`)
-- [ ] **Real test execution** — currently a spec-level LLM gate. Run the actual
-      suite via CI or Vercel Sandbox against the generated code, feed results back
-      into the verdict.
-- [ ] Persist generated tests to the repo / PR instead of only commenting.
+Wire the AI coder (Claude Code CLI runner) into the Jira pipeline so a story
+moving to `implement` is automatically picked up, checked out, implemented, and
+returned as a PR.
 
-## Execute sub-flow hardening
-- [x] Isolated Fargate runner (`sst.aws.Task`) that clones the repo, drives the
-      **Claude Code CLI** (Opus), runs tests, and opens a real GitHub PR
-      (`EXECUTE_MODE=fargate`).
-- [x] Runner streams progress back to Jira as comments + the run log.
-- [x] `agent-dispatched` label prevents double-dispatch; cleared on done/fail.
-- [ ] Verify the runner end-to-end against a live repo (needs AWS deploy).
-- [ ] Surface the PR URL as a first-class field in the dashboard (not just a log line).
+- Trigger: user sets a story to `implement` (label/status) → agent dispatches the
+  isolated Fargate runner for that story.
+- Runner checks out the project's GitHub repo, applies the changes, runs tests,
+  opens a PR, and streams progress back to Jira + the run log.
+- Repo URL + credentials come from per-project config (Secrets Manager), not env.
 
-## Multi-tenancy — see docs/tenant-isolation.md
-- [x] Per-tenant Jira clients (`createJira(auth)`); creds never shared.
-- [x] Tenant-prefixed DynamoDB keys (`T#<tenant>#…`); dashboard tenant selector.
-- [x] Per-story isolated Fargate task (own microVM + scoped creds).
-- [ ] Resolve per-tenant tokens from Secrets Manager/SSM instead of inline `TENANTS`.
-- [ ] Optional per-tenant Anthropic key for usage isolation.
-- [ ] Parallelize tenants per cron tick (bounded concurrency) for large fleets.
+**Done when:** setting a story to `implement` results in a real PR against the
+project's repo, end-to-end, against a live repo.
 
-## Dashboard
-- [ ] **Auth / login** (currently public — anyone can switch tenant; do before exposing).
-- [ ] Manual "trigger run now" button (invoke the agent Lambda).
-- [ ] Per-story timeline view across runs.
-- [ ] Render the generated test cases / QA findings inline.
+## 2. Define flow
+**Status:** open
 
-## Ops
-- [ ] Move secrets from `.env.local` env vars to `sst.Secret`.
-- [ ] Dead-letter / alerting on repeated run errors.
-- [ ] Rate-limit Anthropic calls; batch large boards.
-- [ ] Idempotency guard if a run overruns the 2-min cron interval.
+Define and document the end-to-end state machine the agent drives, so labels,
+statuses, and transitions are unambiguous.
 
-## Docs
-- [x] System flow + testing/QA sub-flow diagrams (`docs/*.mmd` + `.svg`)
-- [ ] Sequence diagram for the Jira ↔ agent ↔ dashboard round-trip.
+- Map every stage: `revise` → `revised` → `ready`/`implement` → `implemented` →
+  `tested` / `tests-failed` → `qa-passed` + `done` / `qa-failed`.
+- Specify entry/exit conditions, who triggers each transition (human vs. agent),
+  and the label ↔ native Jira status mapping.
+- Capture as a diagram + written spec.
+
+**Done when:** the flow is documented and matches the implemented pipeline.

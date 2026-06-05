@@ -13,6 +13,7 @@ web/.react-router/
 
 # env & secrets
 .env
+.env.dev
 .env.local
 .env.*.local
 

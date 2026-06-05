@@ -2,6 +2,7 @@ import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData, useRevalidator, useSearchParams } from "@remix-run/react";
 import { useEffect } from "react";
 import { recentRuns, runEvents, tenants, type RunEvent, type RunSummary } from "~/lib/runs.server";
+import { getUser } from "~/lib/auth.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -10,7 +11,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const runs = await recentRuns(tenant, 25);
   const selected = url.searchParams.get("run") ?? runs[0]?.runId;
   const events = selected ? await runEvents(tenant, selected) : [];
-  return json({ tenants: tenantList, tenant, runs, selected, events });
+  const user = await getUser(request);
+  return json({ tenants: tenantList, tenant, runs, selected, events, user });
 }
 
 const LEVEL_COLOR: Record<string, string> = {
@@ -30,7 +32,7 @@ function fmt(ts?: string) {
 }
 
 export default function Dashboard() {
-  const { tenants: tenantList, tenant, runs, selected, events } = useLoaderData<typeof loader>();
+  const { tenants: tenantList, tenant, runs, selected, events, user } = useLoaderData<typeof loader>();
   const revalidator = useRevalidator();
   const [, setParams] = useSearchParams();
 
@@ -47,7 +49,22 @@ export default function Dashboard() {
         <span style={{ color: "#64748b", fontSize: 13 }}>
           cron every 2 min · auto-refresh 15s
         </span>
-        <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+          <a href="/costs" style={{ color: "#818cf8", fontSize: 13, textDecoration: "none" }}>
+            💸 costs
+          </a>
+          {user ? (
+            <>
+              <span style={{ color: "#64748b", fontSize: 13 }}>{user.email}</span>
+              <a href="/logout" style={{ color: "#818cf8", fontSize: 13, textDecoration: "none" }}>
+                log out
+              </a>
+            </>
+          ) : (
+            <a href="/login" style={{ color: "#818cf8", fontSize: 13, textDecoration: "none" }}>
+              log in
+            </a>
+          )}
           <label htmlFor="tenant" style={{ color: "#64748b", fontSize: 13 }}>
             tenant
           </label>

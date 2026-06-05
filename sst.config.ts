@@ -60,6 +60,31 @@ export default $config({
       primaryIndex: { hashKey: "pk", rangeKey: "sk" },
     });
 
+    // --- Auth: Cognito user pool (self-signup + email confirmation) ----------
+    const userPool = new sst.aws.CognitoUserPool("Auth", {
+      usernames: ["email"],
+      transform: {
+        userPool: (args) => {
+          // Cognito emails a confirmation code on signup and self-signup is allowed.
+          args.autoVerifiedAttributes = ["email"];
+          args.adminCreateUserConfig = { allowAdminCreateUserOnly: false };
+        },
+      },
+    });
+    // Public client (no secret): the Remix server calls the unauthenticated
+    // SignUp / ConfirmSignUp / InitiateAuth APIs, so no SECRET_HASH is needed.
+    const userPoolClient = userPool.addClient("WebClient", {
+      transform: {
+        client: (args) => {
+          args.generateSecret = false;
+          args.explicitAuthFlows = [
+            "ALLOW_USER_PASSWORD_AUTH",
+            "ALLOW_REFRESH_TOKEN_AUTH",
+          ];
+        },
+      },
+    });
+
     // --- Network + cluster for the runner ------------------------------------
     // NAT lets the Fargate task reach api.anthropic.com / git hosts from a
     // private subnet. Each task is its own isolated microVM (no shared FS).
@@ -99,16 +124,27 @@ export default $config({
     const web = new sst.aws.Remix("Web", {
       path: "web",
       link: [runs],
+      // Read this app's cost across all stages from Cost Explorer (public dashboard).
+      permissions: [
+        { actions: ["ce:GetCostAndUsage", "ce:GetTags"], resources: ["*"] },
+      ],
       environment: {
         ...labels,
         // Tenant ids the dashboard offers in its selector.
         TENANT_IDS: process.env.TENANT_IDS ?? "default",
+        // Scope the cost dashboard to exactly this app (matches the sst:app tag).
+        SST_APP_NAME: $app.name,
+        // Cognito (signup / confirm / login).
+        COGNITO_USER_POOL_ID: userPool.id,
+        COGNITO_CLIENT_ID: userPoolClient.id,
       },
     });
 
     return {
       dashboard: web.url,
       table: runs.name,
+      userPool: userPool.id,
+      userPoolClient: userPoolClient.id,
     };
   },
 });
