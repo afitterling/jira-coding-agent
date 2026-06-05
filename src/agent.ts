@@ -10,6 +10,7 @@ import {
 } from "./config.js";
 import { createJira, type Jira, type Story } from "./jira.js";
 import { createLlm } from "./llm.js";
+import { loadProjectTenants } from "./projects.js";
 import { Run, type Stage } from "./store.js";
 
 const has = (s: Story, label: string) => s.labels.includes(label);
@@ -28,7 +29,14 @@ async function maybeTransition(jira: Jira, run: Run, stage: Stage, key: string, 
 
 /** Run the full pipeline for every configured tenant, each fully isolated. */
 export async function runAgent(now: string): Promise<void> {
+  // Env-configured tenants (TENANTS / JIRA_*) plus user-managed projects from the
+  // Projects table (credentials resolved from Secrets Manager).
   const tenants = loadTenants();
+  try {
+    tenants.push(...(await loadProjectTenants()));
+  } catch (e) {
+    console.error(`[agent] loading project tenants failed: ${(e as Error).message}`);
+  }
   // Tenants are independent — run them sequentially with isolated clients/state.
   for (const tenant of tenants) {
     await runTenant(tenant, now);
@@ -163,10 +171,12 @@ async function dispatchRunner(tenant: Tenant, story: Story): Promise<void> {
     STORY_SUMMARY: story.summary,
     STORY_SPEC: story.description,
     TARGET_REPO: tenant.targetRepo ?? "",
-    // Per-tenant Jira credentials — scoped to this single task.
+    // Per-tenant credentials — scoped to this single task (from Secrets Manager
+    // for project-backed tenants, never shared across tenants).
     JIRA_HOST: tenant.jira.host,
     JIRA_EMAIL: tenant.jira.email,
     JIRA_TOKEN: tenant.jira.token,
+    GITHUB_TOKEN: tenant.githubToken ?? "",
     ANTHROPIC_MODEL: tenant.model,
   });
 }

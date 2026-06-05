@@ -55,6 +55,9 @@ export default function Dashboard() {
           </a>
           {user ? (
             <>
+              <a href="/projects" style={{ color: "#818cf8", fontSize: 13, textDecoration: "none" }}>
+                📁 projects
+              </a>
               <span style={{ color: "#64748b", fontSize: 13 }}>{user.email}</span>
               <a href="/logout" style={{ color: "#818cf8", fontSize: 13, textDecoration: "none" }}>
                 log out
