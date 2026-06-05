@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { useT } from "~/i18n/context";
+
 /**
  * Turns the one-page site into a click-through deck: clicking anywhere (that
  * isn't a link/button/text selection) advances to the next section, as do the
@@ -8,6 +10,8 @@ import { useCallback, useEffect, useState } from "react";
  * Fully client-side and SSR-safe — renders nothing until mounted.
  */
 export function Deck() {
+  const { t } = useT();
+  const d = t.deck;
   const [mounted, setMounted] = useState(false);
   const [ids, setIds] = useState<string[]>([]);
   const [current, setCurrent] = useState(0);
@@ -131,7 +135,7 @@ export function Deck() {
     <>
       {/* Right-edge progress dots — click to jump */}
       <nav
-        aria-label="Section navigation"
+        aria-label={d.sectionNavAria}
         data-no-advance
         className="fixed right-5 top-1/2 z-40 hidden -translate-y-1/2 flex-col items-center gap-3 lg:flex"
       >
@@ -139,7 +143,7 @@ export function Deck() {
           <button
             key={id}
             type="button"
-            aria-label={`Go to section ${i + 1}`}
+            aria-label={`${d.goToSection} ${i + 1}`}
             aria-current={i === current}
             onClick={() => goTo(i)}
             className="group grid place-items-center"
@@ -162,7 +166,7 @@ export function Deck() {
       >
         <button
           type="button"
-          aria-label="Previous section"
+          aria-label={d.prev}
           disabled={atStart}
           onClick={() => goTo(current - 1)}
           className="grid h-7 w-7 place-items-center rounded-full text-slate-400 transition-colors enabled:hover:bg-white/10 enabled:hover:text-white disabled:opacity-30"
@@ -175,12 +179,12 @@ export function Deck() {
         </span>
         <button
           type="button"
-          aria-label="Next section"
+          aria-label={d.next}
           disabled={atEnd}
           onClick={() => goTo(current + 1)}
           className="flex items-center gap-1 rounded-full bg-accent/90 px-3 py-1 text-xs font-semibold text-white transition-colors enabled:hover:bg-accent disabled:opacity-30"
         >
-          Next
+          {d.nextLabel}
           <Chevron dir="down" />
         </button>
       </div>
@@ -192,7 +196,7 @@ export function Deck() {
           className="pointer-events-none fixed bottom-10 left-1/2 z-40 flex -translate-x-1/2 flex-col items-center gap-2"
         >
           <span className="rounded-full border border-accent/40 bg-ink-900/85 px-4 py-2 text-center font-mono text-xs uppercase tracking-[0.18em] text-slate-200 shadow-glow backdrop-blur-xl">
-            Click anywhere · press <span className="text-accent">↓</span> · or scroll to explore
+            {d.hintP1}<span className="text-accent">↓</span>{d.hintP2}
           </span>
           <span className="grid h-8 w-8 animate-bounce place-items-center rounded-full border border-accent/40 bg-ink-900/85 text-accent backdrop-blur-xl">
             <Chevron dir="down" />

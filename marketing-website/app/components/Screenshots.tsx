@@ -1,8 +1,11 @@
 import { SectionTag } from "~/components/HowItWorks";
 import { LabelPill } from "~/components/LabelPill";
 import { Reveal } from "~/components/Reveal";
+import { useT } from "~/i18n/context";
 
 export function Screenshots() {
+  const { t } = useT();
+  const sc = t.screenshots;
   return (
     <section
       id="product"
@@ -10,24 +13,23 @@ export function Screenshots() {
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Reveal className="max-w-2xl">
-          <SectionTag>See it in motion</SectionTag>
+          <SectionTag>{sc.tag}</SectionTag>
           <h2 className="mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">
-            From the board to the dashboard.
+            {sc.heading}
           </h2>
           <p className="mt-4 text-lg text-slate-400">
-            Stories move across your Kanban board; the agent dashboard shows
-            every run and event as it happens.
+            {sc.intro}
           </p>
         </Reveal>
 
         <div className="mt-14 grid gap-6 lg:grid-cols-2">
           <Reveal>
-            <BrowserFrame label="your-team.atlassian.net · Kanban board">
+            <BrowserFrame label={sc.boardLabel}>
               <BoardMock />
             </BrowserFrame>
           </Reveal>
           <Reveal delay={120}>
-            <BrowserFrame label="agent dashboard · auto-refresh 15s">
+            <BrowserFrame label={sc.dashboardLabel}>
               <DashboardMock />
             </BrowserFrame>
           </Reveal>
@@ -35,8 +37,7 @@ export function Screenshots() {
 
         <Reveal delay={120}>
           <p className="mt-6 text-center font-mono text-xs text-slate-600">
-            Representative product mockups — swap in real screenshots when you
-            deploy.
+            {sc.footnote}
           </p>
         </Reveal>
       </div>
@@ -67,38 +68,30 @@ function BrowserFrame({
 }
 
 /* ---- Jira board mockup ---- */
-const COLUMNS: { name: string; cards: { id: string; title: string; tone: Parameters<typeof LabelPill>[0]["tone"]; label: string }[] }[] = [
+/** Card metadata (ids, tones, labels stay literal); titles come from the dictionary by flat index. */
+const COLUMN_META: { cards: { id: string; tone: Parameters<typeof LabelPill>[0]["tone"]; label: string }[] }[] = [
   {
-    name: "Ready",
     cards: [
-      { id: "PROJ-142", title: "Rate-limit headers on public API", tone: "ready", label: "#ready" },
-      { id: "PROJ-150", title: "Paginate the audit log endpoint", tone: "ready", label: "#ready" },
+      { id: "PROJ-142", tone: "ready", label: "#ready" },
+      { id: "PROJ-150", tone: "ready", label: "#ready" },
     ],
   },
-  {
-    name: "In Review",
-    cards: [
-      { id: "PROJ-138", title: "Webhook retry with backoff", tone: "implemented", label: "#implemented" },
-    ],
-  },
-  {
-    name: "In QA",
-    cards: [
-      { id: "PROJ-131", title: "CSV export for invoices", tone: "tested", label: "#tested" },
-    ],
-  },
-  {
-    name: "Done",
-    cards: [
-      { id: "PROJ-129", title: "SSO logout redirect fix", tone: "done", label: "#done" },
-    ],
-  },
+  { cards: [{ id: "PROJ-138", tone: "implemented", label: "#implemented" }] },
+  { cards: [{ id: "PROJ-131", tone: "tested", label: "#tested" }] },
+  { cards: [{ id: "PROJ-129", tone: "done", label: "#done" }] },
 ];
 
 function BoardMock() {
+  const { t } = useT();
+  const sc = t.screenshots;
+  let cardIndex = 0;
+  const columns = COLUMN_META.map((col, i) => ({
+    name: sc.columns[i],
+    cards: col.cards.map((c) => ({ ...c, title: sc.cards[cardIndex++] })),
+  }));
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      {COLUMNS.map((col) => (
+      {columns.map((col) => (
         <div key={col.name} className="rounded-xl bg-ink-800/60 p-2.5">
           <div className="mb-2 flex items-center justify-between px-1">
             <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
@@ -133,14 +126,18 @@ function BoardMock() {
 }
 
 /* ---- Dashboard mockup ---- */
-const RUNS = [
-  { id: "#284", story: "PROJ-142", state: "running", note: "implementing · tests 8/12", tone: "implemented" as const },
-  { id: "#283", story: "PROJ-138", state: "pr-open", note: "opened PR #318", tone: "qa" as const },
-  { id: "#282", story: "PROJ-131", state: "qa", note: "edge cases clean", tone: "tested" as const },
-  { id: "#281", story: "PROJ-129", state: "done", note: "merged · qa-passed", tone: "done" as const },
+/** Run metadata (ids, stories, state codes, tones stay literal); notes come from the dictionary. */
+const RUN_META = [
+  { id: "#284", story: "PROJ-142", state: "running", tone: "implemented" as const },
+  { id: "#283", story: "PROJ-138", state: "pr-open", tone: "qa" as const },
+  { id: "#282", story: "PROJ-131", state: "qa", tone: "tested" as const },
+  { id: "#281", story: "PROJ-129", state: "done", tone: "done" as const },
 ];
 
 function DashboardMock() {
+  const { t } = useT();
+  const d = t.screenshots.dashboard;
+  const runs = RUN_META.map((r, i) => ({ ...r, note: d.notes[i] }));
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
@@ -150,15 +147,15 @@ function DashboardMock() {
             <span className="relative inline-flex h-2 w-2 rounded-full bg-accent-lime" />
           </span>
           <span className="text-sm font-medium text-slate-200">
-            Live runs
+            {d.liveRuns}
           </span>
-          <span className="font-mono text-xs text-slate-600">tenant: sp33c</span>
+          <span className="font-mono text-xs text-slate-600">{d.tenant}</span>
         </div>
         <span className="font-mono text-[10px] text-slate-600">⟳ 15s</span>
       </div>
 
       <div className="space-y-2">
-        {RUNS.map((r) => (
+        {runs.map((r) => (
           <div
             key={r.id}
             className="flex items-center gap-3 rounded-lg border border-white/5 bg-ink-900/80 px-3 py-2.5"
@@ -176,11 +173,7 @@ function DashboardMock() {
       </div>
 
       <div className="mt-3 grid grid-cols-3 gap-2">
-        {[
-          ["12", "runs today"],
-          ["3", "PRs opened"],
-          ["0", "failures"],
-        ].map(([n, l]) => (
+        {d.stats.map(([n, l]) => (
           <div
             key={l}
             className="rounded-lg bg-ink-800/60 px-3 py-2 text-center"

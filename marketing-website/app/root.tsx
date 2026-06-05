@@ -1,16 +1,28 @@
 import type {
   LinksFunction,
+  LoaderFunctionArgs,
   MetaFunction,
 } from "@remix-run/node";
+import { json } from "@remix-run/node";
 import {
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
+  useRouteLoaderData,
 } from "@remix-run/react";
 
+import { I18nProvider } from "~/i18n/context";
+import { DEFAULT_LOCALE } from "~/i18n/config";
+import { dictionaries } from "~/i18n/index";
+import { getLocale } from "~/i18n.server";
 import tailwind from "~/tailwind.css?url";
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  return json({ locale: await getLocale(request) });
+}
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -26,27 +38,25 @@ export const links: LinksFunction = () => [
   { rel: "stylesheet", href: tailwind },
 ];
 
-export const meta: MetaFunction = () => [
-  { title: "Agentic Coding with Jira — sp33c" },
-  {
-    name: "description",
-    content:
-      "sp33c builds agentic coding with Jira: label a story #ready and an autonomous Claude Opus agent implements it, runs tests + QA, and opens a PR. Human Override keeps you in command.",
-  },
-  { name: "author", content: "Alex Fitterling — sp33c" },
-  { name: "theme-color", content: "#030307" },
-  { property: "og:title", content: "Agentic Coding with Jira — sp33c" },
-  {
-    property: "og:description",
-    content:
-      "Agentic coding with Jira by sp33c — implement, test, QA, PR. Autonomy you can veto.",
-  },
-  { property: "og:type", content: "website" },
-];
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  const locale = data?.locale ?? DEFAULT_LOCALE;
+  const m = dictionaries[locale].meta;
+  return [
+    { title: m.title },
+    { name: "description", content: m.description },
+    { name: "author", content: "Alex Fitterling — sp33c" },
+    { name: "theme-color", content: "#030307" },
+    { property: "og:title", content: m.ogTitle },
+    { property: "og:description", content: m.ogDescription },
+    { property: "og:type", content: "website" },
+  ];
+};
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const data = useRouteLoaderData<typeof loader>("root");
+  const locale = data?.locale ?? DEFAULT_LOCALE;
   return (
-    <html lang="en" className="dark">
+    <html lang={locale} className="dark">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -63,5 +73,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  const { locale } = useLoaderData<typeof loader>();
+  return (
+    <I18nProvider locale={locale}>
+      <Outlet />
+    </I18nProvider>
+  );
 }

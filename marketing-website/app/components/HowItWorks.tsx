@@ -1,38 +1,19 @@
 import { LabelPill } from "~/components/LabelPill";
 import { Reveal } from "~/components/Reveal";
+import { useT } from "~/i18n/context";
 
-type Step = {
+type StepMeta = {
   n: string;
-  title: string;
-  body: string;
   pill?: React.ReactNode;
   icon: React.ReactNode;
 };
 
-const STEPS: Step[] = [
-  {
-    n: "01",
-    title: "Write a Jira story",
-    body: "A normal story on your Kanban board — summary, description, acceptance criteria. No special tooling, no new workflow to learn.",
-    icon: <PenIcon />,
-  },
-  {
-    n: "02",
-    title: "Label it #ready",
-    body: "Flip the label when the spec is good to build. That label is the trigger — the agent treats acceptance criteria as the contract.",
-    pill: <LabelPill tone="ready">#ready</LabelPill>,
-    icon: <TagIcon />,
-  },
-  {
-    n: "03",
-    title: "The agent picks it up",
-    body: "A cron tick (every ~2 min) docks the board, finds #ready stories, and dispatches each to its own isolated Fargate microVM.",
-    icon: <BoltIcon />,
-  },
+const STEP_META: StepMeta[] = [
+  { n: "01", icon: <PenIcon /> },
+  { n: "02", pill: <LabelPill tone="ready">#ready</LabelPill>, icon: <TagIcon /> },
+  { n: "03", icon: <BoltIcon /> },
   {
     n: "04",
-    title: "Implement · test · QA",
-    body: "Claude Opus clones the repo, writes the code, derives tests from the AC, then runs a QA gate for edge cases and regressions.",
     pill: (
       <span className="flex flex-wrap gap-1.5">
         <LabelPill tone="implemented">#implemented</LabelPill>
@@ -41,33 +22,24 @@ const STEPS: Step[] = [
     ),
     icon: <CheckShieldIcon />,
   },
-  {
-    n: "05",
-    title: "Open a pull request",
-    body: "Passing work lands on a branch and opens a PR, with a summary posted back to the Jira ticket. Everything is traceable.",
-    icon: <BranchIcon />,
-  },
-  {
-    n: "06",
-    title: "You review & merge",
-    body: "Nothing ships without you. The human gate is the PR — approve, request changes, or send it back with #revise.",
-    pill: <LabelPill tone="done">#qa-passed → #done</LabelPill>,
-    icon: <EyeIcon />,
-  },
+  { n: "05", icon: <BranchIcon /> },
+  { n: "06", pill: <LabelPill tone="done">#qa-passed → #done</LabelPill>, icon: <EyeIcon /> },
 ];
 
 export function HowItWorks() {
+  const { t } = useT();
+  const h = t.howItWorks;
+  const steps = STEP_META.map((m, i) => ({ ...m, ...h.steps[i] }));
   return (
     <section id="how" className="relative scroll-mt-20 py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Reveal className="max-w-2xl">
-          <SectionTag>How it works</SectionTag>
+          <SectionTag>{h.tag}</SectionTag>
           <h2 className="mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">
-            A story in. A pull request out.
+            {h.heading}
           </h2>
           <p className="mt-4 text-lg text-slate-400">
-            The whole pipeline is label-driven. You move a label; the agent does
-            the rest and hands you a reviewable diff.
+            {h.intro}
           </p>
         </Reveal>
 
@@ -78,7 +50,7 @@ export function HowItWorks() {
             className="absolute left-0 right-0 top-7 hidden h-px bg-gradient-to-r from-accent/0 via-accent/40 to-accent-cyan/0 lg:block"
           />
           <ol className="grid gap-6 sm:grid-cols-2 lg:grid-cols-6 lg:gap-4">
-            {STEPS.map((step, i) => (
+            {steps.map((step, i) => (
               <Reveal as="li" key={step.n} delay={i * 80}>
                 <div className="group relative flex h-full flex-col">
                   <div className="relative z-10 mb-5 flex items-center gap-3">
@@ -114,15 +86,16 @@ export function HowItWorks() {
               </span>
               <div>
                 <h3 className="font-semibold text-white">
-                  Specs can be sharpened first
+                  {h.reviseTitle}
                 </h3>
                 <p className="mt-1 text-sm text-slate-400">
-                  Stories marked{" "}
-                  <LabelPill tone="revise">#revise</LabelPill> +{" "}
-                  <LabelPill tone="neutral">#undone</LabelPill> get a refinement
-                  pass — the agent tightens acceptance criteria, then marks them{" "}
-                  <LabelPill tone="revised">#revised</LabelPill> before any code
-                  is written.
+                  {h.reviseP1}
+                  <LabelPill tone="revise">#revise</LabelPill>
+                  {h.reviseP2}
+                  <LabelPill tone="neutral">#undone</LabelPill>
+                  {h.reviseP3}
+                  <LabelPill tone="revised">#revised</LabelPill>
+                  {h.reviseP4}
                 </p>
               </div>
             </div>

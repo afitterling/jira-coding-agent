@@ -1,72 +1,42 @@
 import { SectionTag } from "~/components/HowItWorks";
 import { LabelPill } from "~/components/LabelPill";
 import { Reveal } from "~/components/Reveal";
+import { useT } from "~/i18n/context";
 
-type Feature = {
-  title: string;
-  body: string;
-  bullets?: string[];
+type FeatureMeta = {
   icon: React.ReactNode;
   span?: boolean;
   highlight?: boolean;
 };
 
-const FEATURES: Feature[] = [
-  {
-    title: "Agentic AI, end to end",
-    body: "This is autonomous agentic AI — not autocomplete. Claude Opus plans, edits across files, runs commands, reads test output, and self-corrects until the acceptance criteria are met. Each #ready story runs the Claude Code CLI inside its own Fargate task: clone → code → test → PR.",
-    bullets: ["agent orchestration", "tool use + self-correction", "Claude Code CLI"],
-    icon: <RobotIcon />,
-    span: true,
-    highlight: true,
-  },
-  {
-    title: "Jira workflow integration",
-    body: "Label-driven by default. Optionally mirror outcomes onto your native Jira workflow — implemented → In Review, tested → In QA, qa-passed → Done — with JIRA_DRIVE_STATUS.",
-    icon: <JiraIcon />,
-  },
-  {
-    title: "Testing + QA sub-flows",
-    body: "Two automated gates after implementation: a testing gate that derives cases from the AC, and a QA gate for edge cases and regressions.",
-    bullets: ["#implemented → #tested", "#tested → #qa-passed + #done"],
-    icon: <FlaskIcon />,
-  },
-  {
-    title: "Tenant isolation",
-    body: "One deployment serves many Jira sites with no data, credential, or compute bleed. Run-log keys are tenant-prefixed; each story executes in its own throwaway microVM with only its tenant's creds.",
-    bullets: ["key-prefixed run log", "per-task creds + microVM", "crash isolation per tenant"],
-    icon: <ShieldIcon />,
-    span: true,
-  },
-  {
-    title: "Live run dashboard",
-    body: "A Remix dashboard visualizes runs and events per tenant, auto-refreshing every 15s so you can watch the agent work in real time.",
-    icon: <GaugeIcon />,
-  },
-  {
-    title: "PR-gated, traceable",
-    body: "Nothing merges autonomously. Work lands as a branch + PR with a summary posted back to the ticket — humans stay the final gate.",
-    icon: <GitIcon />,
-  },
+const FEATURE_META: FeatureMeta[] = [
+  { icon: <RobotIcon />, span: true, highlight: true },
+  { icon: <JiraIcon /> },
+  { icon: <FlaskIcon /> },
+  { icon: <ShieldIcon />, span: true },
+  { icon: <GaugeIcon /> },
+  { icon: <GitIcon /> },
 ];
 
 export function Features() {
+  const { t } = useT();
+  const fc = t.features;
+  const features = FEATURE_META.map((m, i) => ({ ...m, ...fc.items[i] }));
   return (
     <section id="features" className="relative scroll-mt-20 py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Reveal className="max-w-2xl">
-          <SectionTag>Capabilities</SectionTag>
+          <SectionTag>{fc.tag}</SectionTag>
           <h2 className="mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">
-            Built like infrastructure, not a demo.
+            {fc.heading}
           </h2>
           <p className="mt-4 text-lg text-slate-400">
-            Runs on SST / AWS — cron, DynamoDB run log, Fargate runner, and a
-            Remix dashboard, linked together around an autonomous agent.
+            {fc.intro}
           </p>
         </Reveal>
 
         <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map((f, i) => (
+          {features.map((f, i) => (
             <Reveal
               key={f.title}
               delay={(i % 3) * 80}
@@ -90,7 +60,7 @@ export function Features() {
                 {f.highlight && (
                   <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-2.5 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wide text-indigo-200">
                     <span className="h-1.5 w-1.5 rounded-full bg-accent-lime" />
-                    Agentic AI
+                    {fc.badge}
                   </span>
                 )}
                 <div
@@ -106,7 +76,7 @@ export function Features() {
                 <p className="mt-2 text-sm leading-relaxed text-slate-400">
                   {f.body}
                 </p>
-                {f.bullets && (
+                {f.bullets.length > 0 && (
                   <ul className="mt-4 flex flex-wrap gap-1.5">
                     {f.bullets.map((b) => (
                       <li key={b}>

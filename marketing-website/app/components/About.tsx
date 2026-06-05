@@ -1,54 +1,39 @@
 import { SectionTag } from "~/components/HowItWorks";
 import { Reveal } from "~/components/Reveal";
-
-const FOCUS = [
-  "Agentic & Generative AI",
-  "AI Agents & Orchestration",
-  "LLMs, RAG & Prompt Engineering",
-  "Security Architecture & Cyber Security",
-  "Zero Trust & IAM",
-  "Cloud-native Engineering (AWS · Azure · GCP)",
-  "Critical Infrastructure & KRITIS Energy",
-  "AI for Ethical Investing & Capital Markets",
-];
+import { useT } from "~/i18n/context";
 
 export function About() {
+  const { t } = useT();
+  const a = t.about;
   return (
     <section id="about" className="relative scroll-mt-20 py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <Reveal>
-            <SectionTag>Who builds this</SectionTag>
+            <SectionTag>{a.tag}</SectionTag>
             <h2 className="mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">
-              Made by{" "}
-              <span className="text-gradient">sp33c</span>
+              {a.headingLead}
+              <span className="text-gradient">{a.headingName}</span>
             </h2>
             <p className="mt-5 text-lg leading-relaxed text-slate-400">
               <span className="font-semibold text-slate-200">
-                Alex Fitterling
-              </span>{" "}
-              is an engineer and architect with deep expertise across Cyber
-              Security, Security Architecture, AI, Cloud, and DevOps —
-              designing and delivering secure, scalable solutions for private
-              and public sector clients.
+                {a.leadName}
+              </span>
+              {a.leadRest}
             </p>
             <p className="mt-4 leading-relaxed text-slate-400">
-              He has led cross-functional teams as a Solution Engineer, Security
-              Architect, Product Owner, and Scrum Master — working across
-              Switzerland, Singapore, Malaysia, and Germany.
+              {a.p2}
             </p>
             <p className="mt-4 leading-relaxed text-slate-400">
-              His focus on{" "}
+              {a.p3a}
               <span className="font-medium text-indigo-200">
-                Agentic &amp; Generative AI
-              </span>{" "}
-              — AI agents, orchestration, and LLM-driven systems — is exactly
-              what powers this project: an autonomous coding agent that turns a
-              Jira backlog into reviewed, shipped code.
+                {a.p3focus}
+              </span>
+              {a.p3b}
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <a href="https://sp33c.tech" target="_blank" rel="noreferrer" className="btn-primary">
-                Visit sp33c.tech
+                {a.ctaVisit}
                 <svg viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="none">
                   <path
                     d="M7 4h9v9M16 4 7 13M4 8v8h8"
@@ -60,7 +45,7 @@ export function About() {
                 </svg>
               </a>
               <a href="mailto:info@sp33c.tech" className="btn-ghost">
-                info@sp33c.tech
+                {a.ctaEmail}
               </a>
             </div>
           </Reveal>
@@ -68,10 +53,10 @@ export function About() {
           <Reveal delay={120}>
             <div className="card p-8">
               <p className="font-mono text-xs uppercase tracking-widest text-accent">
-                Focus areas
+                {a.focusTitle}
               </p>
               <ul className="mt-5 grid gap-3 sm:grid-cols-2">
-                {FOCUS.map((f) => (
+                {a.focus.map((f) => (
                   <li
                     key={f}
                     className="flex items-start gap-2.5 text-sm text-slate-300"
@@ -82,9 +67,9 @@ export function About() {
                 ))}
               </ul>
               <div className="mt-7 border-t border-white/10 pt-5 text-sm text-slate-500">
-                <p className="text-slate-400">Nuremberg, Germany</p>
+                <p className="text-slate-400">{a.location}</p>
                 <p className="mt-0.5">
-                  Across Switzerland · Singapore · Malaysia · Germany
+                  {a.locationSpread}
                 </p>
               </div>
             </div>

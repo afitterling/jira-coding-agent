@@ -1,17 +1,15 @@
 import { useEffect, useState } from "react";
 
-const LINKS = [
-  { href: "#how", label: "How it works" },
-  { href: "#loop", label: "Human Override" },
-  { href: "#interfaces", label: "AI Models" },
-  { href: "#use-cases", label: "Use cases" },
-  { href: "#data", label: "Synapse" },
-  { href: "#about", label: "About" },
-];
+import { LanguageToggle } from "~/components/LanguageToggle";
+import { useT } from "~/i18n/context";
+
+const LINK_HREFS = ["#how", "#loop", "#interfaces", "#use-cases", "#data", "#about"];
 
 const REPO_URL = "https://github.com/afitterling/jira-coding-agent";
 
 export function Nav() {
+  const { t } = useT();
+  const links = LINK_HREFS.map((href, i) => ({ href, label: t.nav.links[i] }));
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -44,7 +42,7 @@ export function Nav() {
         </a>
 
         <div className="hidden items-center gap-1 md:flex">
-          {LINKS.map((l) => (
+          {links.map((l) => (
             <a
               key={l.href}
               href={l.href}
@@ -63,14 +61,15 @@ export function Nav() {
             className="hidden text-sm text-slate-400 transition-colors hover:text-white sm:inline-flex sm:items-center sm:gap-1.5"
           >
             <GitHubMark className="h-4 w-4" />
-            GitHub
+            {t.nav.github}
           </a>
+          <LanguageToggle className="hidden sm:inline-flex" />
           <a href="#how" className="btn-primary !px-4 !py-2">
-            See the flow
+            {t.nav.cta}
           </a>
           <button
             type="button"
-            aria-label="Toggle navigation"
+            aria-label={t.nav.menuAria}
             onClick={() => setOpen((v) => !v)}
             className="grid h-9 w-9 place-items-center rounded-lg border border-white/10 text-slate-300 md:hidden"
           >
@@ -88,7 +87,7 @@ export function Nav() {
 
       {open && (
         <div className="border-t border-white/10 bg-ink-950/95 px-4 py-3 backdrop-blur-xl md:hidden">
-          {LINKS.map((l) => (
+          {links.map((l) => (
             <a
               key={l.href}
               href={l.href}
@@ -98,6 +97,9 @@ export function Nav() {
               {l.label}
             </a>
           ))}
+          <div className="mt-2 border-t border-white/10 pt-3">
+            <LanguageToggle />
+          </div>
         </div>
       )}
     </header>

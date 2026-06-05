@@ -2,45 +2,20 @@ import { useState } from "react";
 
 import { SectionTag } from "~/components/HowItWorks";
 import { Reveal } from "~/components/Reveal";
+import { useT } from "~/i18n/context";
 
-type Diagram = {
-  id: string;
-  tab: string;
-  title: string;
-  caption: string;
-  src: string;
-};
-
-const DIAGRAMS: Diagram[] = [
-  {
-    id: "system",
-    tab: "System flow",
-    title: "The end-to-end pipeline",
-    caption:
-      "Authenticate → fetch the board → revise specs → execute #ready stories → label + open PR → report. The full label-driven loop the agent runs every cron tick.",
-    src: "/diagrams/system-flow.svg",
-  },
-  {
-    id: "testing",
-    tab: "Testing sub-flow",
-    title: "The testing gate",
-    caption:
-      "After #implemented, the agent derives test cases from the acceptance criteria and judges the implementation — passing to #tested, failing to #tests-failed.",
-    src: "/diagrams/testing-flow.svg",
-  },
-  {
-    id: "qa",
-    tab: "QA sub-flow",
-    title: "The QA gate",
-    caption:
-      "A #tested story is validated for completeness, edge cases, and regressions — promoted to #qa-passed + #done, or sent back as #qa-failed.",
-    src: "/diagrams/qa-flow.svg",
-  },
+const DIAGRAM_META = [
+  { id: "system", src: "/diagrams/system-flow.svg" },
+  { id: "testing", src: "/diagrams/testing-flow.svg" },
+  { id: "qa", src: "/diagrams/qa-flow.svg" },
 ];
 
 export function Diagrams() {
-  const [active, setActive] = useState(DIAGRAMS[0].id);
-  const current = DIAGRAMS.find((d) => d.id === active)!;
+  const { t } = useT();
+  const d = t.diagrams;
+  const diagrams = DIAGRAM_META.map((m, i) => ({ ...m, ...d.items[i] }));
+  const [active, setActive] = useState(diagrams[0].id);
+  const current = diagrams.find((x) => x.id === active)!;
 
   return (
     <section
@@ -49,13 +24,12 @@ export function Diagrams() {
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Reveal className="max-w-2xl">
-          <SectionTag>Architecture, in diagrams</SectionTag>
+          <SectionTag>{d.tag}</SectionTag>
           <h2 className="mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">
-            No black box. Every gate is mapped.
+            {d.heading}
           </h2>
           <p className="mt-4 text-lg text-slate-400">
-            These are the actual flow diagrams that ship in the repo — the same
-            logic the agentic pipeline executes on each run.
+            {d.intro}
           </p>
         </Reveal>
 
@@ -63,22 +37,22 @@ export function Diagrams() {
           {/* Tabs */}
           <div
             role="tablist"
-            aria-label="Flow diagrams"
+            aria-label={d.tablistAria}
             className="mt-10 inline-flex flex-wrap gap-1 rounded-2xl border border-white/10 bg-ink-800/60 p-1"
           >
-            {DIAGRAMS.map((d) => (
+            {diagrams.map((dg) => (
               <button
-                key={d.id}
+                key={dg.id}
                 role="tab"
-                aria-selected={active === d.id}
-                onClick={() => setActive(d.id)}
+                aria-selected={active === dg.id}
+                onClick={() => setActive(dg.id)}
                 className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
-                  active === d.id
+                  active === dg.id
                     ? "bg-accent text-white shadow-glow"
                     : "text-slate-400 hover:text-white"
                 }`}
               >
-                {d.tab}
+                {dg.tab}
               </button>
             ))}
           </div>
@@ -99,7 +73,7 @@ export function Diagrams() {
                   rel="noreferrer"
                   className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-accent-cyan hover:text-cyan-200"
                 >
-                  Open full diagram
+                  {d.openFull}
                   <svg viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="none">
                     <path
                       d="M7 4h9v9M16 4 7 13M4 8v8h8"
