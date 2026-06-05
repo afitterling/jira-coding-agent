@@ -1,6 +1,6 @@
 import { Resource } from "sst";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, PutCommand, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
 const doc = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const TABLE = Resource.Runs.name;
@@ -97,6 +97,23 @@ export class Run {
       }),
     );
   }
+}
+
+/**
+ * Count one Fargate runner dispatch for a tenant/project in the given month.
+ * Drives per-project Fargate cost attribution in the cost dashboard (no AWS
+ * per-task cost tagging needed). Key: `USAGE#<tenantId>` / `<YYYY-MM>`.
+ */
+export async function recordRunnerUsage(tenantId: string, isoTime: string): Promise<void> {
+  const month = isoTime.slice(0, 7);
+  await doc.send(
+    new UpdateCommand({
+      TableName: TABLE,
+      Key: { pk: `USAGE#${tenantId}`, sk: month },
+      UpdateExpression: "ADD runnerRuns :one SET tenantId = :t",
+      ExpressionAttributeValues: { ":one": 1, ":t": tenantId },
+    }),
+  );
 }
 
 /** Dashboard helper: most recent runs for one tenant (newest first). */

@@ -60,6 +60,17 @@ export default $config({
       primaryIndex: { hashKey: "pk", rangeKey: "sk" },
     });
 
+    // --- User-managed projects (metadata; credentials live in Secrets Manager)
+    const projects = new sst.aws.Dynamo("Projects", {
+      fields: { pk: "string", sk: "string" },
+      primaryIndex: { hashKey: "pk", rangeKey: "sk" },
+    });
+
+    // Namespaced secret prefix + the ARN pattern both web (write) and cron (read)
+    // are scoped to. Per-stage so dev/prod credentials never collide.
+    const secretPrefix = `${$app.name}/${$app.stage}/project`;
+    const secretArnPattern = `arn:aws:secretsmanager:*:*:secret:${secretPrefix}/*`;
+
     // --- Auth: Cognito user pool (self-signup + email confirmation) ----------
     const userPool = new sst.aws.CognitoUserPool("Auth", {
       usernames: ["email"],
@@ -83,6 +94,13 @@ export default $config({
           ];
         },
       },
+    });
+    // Members of this group are admins (see all costs across projects). Add users
+    // via the console or `aws cognito-idp admin-add-user-to-group`.
+    new aws.cognito.UserGroup("AdminGroup", {
+      userPoolId: userPool.id,
+      name: "admin",
+      description: "Can view all AWS costs and per-project cost across all owners",
     });
 
     // --- Network + cluster for the runner ------------------------------------
@@ -112,10 +130,13 @@ export default $config({
       schedule: "rate(2 minutes)",
       function: {
         handler: "src/cron.handler",
-        link: [runs, runner], // permission to read the log + dispatch runner tasks
+        // read the log + dispatch runner tasks + read project metadata
+        link: [runs, runner, projects],
+        // resolve per-project credentials at dispatch time.
+        permissions: [{ actions: ["secretsmanager:GetSecretValue"], resources: [secretArnPattern] }],
         timeout: "5 minutes",
         memory: "512 MB",
-        environment: sharedEnv,
+        environment: { ...sharedEnv, SECRET_PREFIX: secretPrefix },
         nodejs: { install: ["@anthropic-ai/sdk"] },
       },
     });
@@ -123,10 +144,15 @@ export default $config({
     // --- Remix dashboard ------------------------------------------------------
     const web = new sst.aws.Remix("Web", {
       path: "web",
-      link: [runs],
-      // Read this app's cost across all stages from Cost Explorer (public dashboard).
+      link: [runs, projects],
       permissions: [
+        // Read this app's cost across all stages from Cost Explorer (public dashboard).
         { actions: ["ce:GetCostAndUsage", "ce:GetTags"], resources: ["*"] },
+        // Manage per-project credential secrets (create on add, delete on remove).
+        {
+          actions: ["secretsmanager:CreateSecret", "secretsmanager:PutSecretValue", "secretsmanager:DeleteSecret", "secretsmanager:TagResource"],
+          resources: [secretArnPattern],
+        },
       ],
       environment: {
         ...labels,
@@ -137,6 +163,8 @@ export default $config({
         // Cognito (signup / confirm / login).
         COGNITO_USER_POOL_ID: userPool.id,
         COGNITO_CLIENT_ID: userPoolClient.id,
+        // Namespace for per-project credential secrets.
+        SECRET_PREFIX: secretPrefix,
       },
     });
 

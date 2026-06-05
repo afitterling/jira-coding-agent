@@ -1,37 +1,17 @@
 import { Reveal } from "~/components/Reveal";
+import { useT } from "~/i18n/context";
 
-/** A pluggable model backend the agent can drive. */
-const INTERFACES: {
-  name: string;
-  tag: string;
-  body: string;
-  accent: string; // ring/text colour
-  dot: string;
-}[] = [
-  {
-    name: "Anthropic Claude",
-    tag: "default",
-    body: "Claude Opus drives the agent out of the box — the sharpest coding model for spec-to-PR work.",
-    accent: "ring-accent/30 text-indigo-300",
-    dot: "bg-accent",
-  },
-  {
-    name: "AWS Bedrock",
-    tag: "managed",
-    body: "Route to Bedrock for Claude, Llama, or Mistral inside your own AWS account, VPC, and compliance boundary.",
-    accent: "ring-amber-400/30 text-amber-300",
-    dot: "bg-amber-400",
-  },
-  {
-    name: "LM Studio",
-    tag: "local",
-    body: "Point the agent at a local LM Studio endpoint — fully offline. Your code and prompts never leave the building.",
-    accent: "ring-accent-cyan/30 text-cyan-300",
-    dot: "bg-accent-cyan",
-  },
+/** A pluggable model backend the agent can drive (display metadata + brand name). */
+const INTERFACE_META: { name: string; accent: string; dot: string }[] = [
+  { name: "Anthropic Claude", accent: "ring-accent/30 text-indigo-300", dot: "bg-accent" },
+  { name: "AWS Bedrock", accent: "ring-amber-400/30 text-amber-300", dot: "bg-amber-400" },
+  { name: "LM Studio", accent: "ring-accent-cyan/30 text-cyan-300", dot: "bg-accent-cyan" },
 ];
 
 export function Interfaces() {
+  const { t } = useT();
+  const it = t.interfaces;
+  const interfaces = INTERFACE_META.map((m, i) => ({ ...m, ...it.items[i] }));
   return (
     <section
       id="interfaces"
@@ -46,41 +26,39 @@ export function Interfaces() {
           <Reveal>
             <span className="inline-flex items-center gap-2 rounded-full border border-accent-cyan/30 bg-accent-cyan/10 px-3 py-1 font-mono text-xs uppercase tracking-[0.18em] text-cyan-200">
               <span className="h-1.5 w-1.5 rounded-full bg-accent-cyan" />
-              AI Interfaces
+              {it.badge}
             </span>
           </Reveal>
 
           <Reveal delay={80}>
             <h2 className="mt-6 text-balance text-4xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl">
-              Plug in <span className="text-gradient">any model.</span>
+              {it.titleLead}<span className="text-gradient">{it.titleAccent}</span>
             </h2>
           </Reveal>
 
           <Reveal delay={140}>
             <p className="mt-5 max-w-2xl text-pretty text-lg leading-relaxed text-slate-400">
-              The agent is model-agnostic. Run frontier Claude in the cloud,
-              keep everything inside your AWS account with Bedrock, or go fully
-              local with LM Studio — same pipeline, your choice of brain.
+              {it.intro}
             </p>
           </Reveal>
         </div>
 
         <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {INTERFACES.map((it, i) => (
-            <Reveal key={it.name} delay={i * 80}>
+          {interfaces.map((card, i) => (
+            <Reveal key={card.name} delay={i * 80}>
               <div className="card group h-full p-6 transition-colors hover:border-white/20">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <span className={`h-2.5 w-2.5 rounded-full ${it.dot} shadow-glow`} />
-                    <h3 className="text-base font-semibold text-white">{it.name}</h3>
+                    <span className={`h-2.5 w-2.5 rounded-full ${card.dot} shadow-glow`} />
+                    <h3 className="text-base font-semibold text-white">{card.name}</h3>
                   </div>
                   <span
-                    className={`rounded-md px-2 py-0.5 font-mono text-[11px] uppercase tracking-wide ring-1 ring-inset ${it.accent}`}
+                    className={`rounded-md px-2 py-0.5 font-mono text-[11px] uppercase tracking-wide ring-1 ring-inset ${card.accent}`}
                   >
-                    {it.tag}
+                    {card.tag}
                   </span>
                 </div>
-                <p className="mt-3 text-sm leading-relaxed text-slate-400">{it.body}</p>
+                <p className="mt-3 text-sm leading-relaxed text-slate-400">{card.body}</p>
               </div>
             </Reveal>
           ))}
@@ -103,12 +81,10 @@ export function Interfaces() {
               </span>
               <div>
                 <h3 className="text-base font-semibold text-white">
-                  Every agent runs isolated on AWS Fargate
+                  {it.calloutTitle}
                 </h3>
                 <p className="mt-1 max-w-xl text-sm leading-relaxed text-slate-400">
-                  Each story is implemented in its own ephemeral Fargate microVM —
-                  separate compute, filesystem, and credentials. No shared state
-                  between runs or tenants.
+                  {it.calloutBody}
                 </p>
               </div>
             </div>

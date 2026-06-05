@@ -1,14 +1,29 @@
-import { json, type LoaderFunctionArgs } from "@remix-run/node";
+import { json, redirect, type LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData, useRevalidator } from "@remix-run/react";
 import { useEffect } from "react";
-import { getCostReport, type CostReport } from "~/lib/costs.server";
+import { getUser, isAdmin } from "~/lib/auth.server";
+import {
+  getCostReport,
+  getProjectCosts,
+  type CostReport,
+  type ProjectCost,
+} from "~/lib/costs.server";
 
-export async function loader(_: LoaderFunctionArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
+  const user = await getUser(request);
+  if (!user) return redirect("/login");
+  const admin = isAdmin(user);
   try {
     const report = await getCostReport(6);
-    return json({ report, error: null as string | null });
+    const projectReport = await getProjectCosts(report);
+    if (admin) {
+      return json({ admin: true, email: user.email, report, projects: projectReport.projects, error: null as string | null });
+    }
+    // Owner: only their own projects, no app-wide totals.
+    const mine = projectReport.projects.filter((p) => p.ownerEmail === user.email);
+    return json({ admin: false, email: user.email, report: null as CostReport | null, projects: mine, error: null as string | null });
   } catch (e) {
-    return json({ report: null as CostReport | null, error: (e as Error).message });
+    return json({ admin, email: user.email, report: null as CostReport | null, projects: [] as ProjectCost[], error: (e as Error).message });
   }
 }
 
@@ -21,10 +36,10 @@ function money(n: number, currency: string) {
 }
 
 export default function Costs() {
-  const { report, error } = useLoaderData<typeof loader>();
+  const { admin, email, report, projects, error } = useLoaderData<typeof loader>();
   const revalidator = useRevalidator();
+  const currency = report?.currency ?? "USD";
 
-  // Cost data lags; a slow refresh keeps the page live without hammering CE.
   useEffect(() => {
     const id = setInterval(() => revalidator.revalidate(), 5 * 60_000);
     return () => clearInterval(id);
@@ -35,39 +50,44 @@ export default function Costs() {
   return (
     <main style={{ maxWidth: 1000, margin: "0 auto", padding: "32px 24px" }}>
       <header style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
-        <h1 style={{ fontSize: 24, margin: 0 }}>💸 Cost — {report?.app ?? "jira-coding-agent"}</h1>
-        <span style={{ color: "#64748b", fontSize: 13 }}>all stages · per AWS service</span>
-        <a href="/" style={link}>← runs</a>
+        <h1 style={{ fontSize: 24, margin: 0 }}>💸 Cost</h1>
+        <span style={{ color: "#64748b", fontSize: 13 }}>
+          {admin ? "admin · all stages & projects" : "your projects"}
+        </span>
+        <span style={{ marginLeft: "auto", display: "flex", gap: 12, alignItems: "center" }}>
+          <span style={{ color: "#64748b", fontSize: 13 }}>{email}</span>
+          <a href="/" style={link}>← runs</a>
+          <a href="/logout" style={link}>log out</a>
+        </span>
       </header>
 
       {error && <Note tone="error">Cost Explorer error: {error}</Note>}
 
-      {report && !report.tagsActive && (
+      {/* ---- Admin: app-wide cost (all stages × service) -------------------- */}
+      {admin && report && !report.tagsActive && (
         <Note tone="warn">
           The <code>sst:app</code>/<code>sst:stage</code> cost-allocation tags don&apos;t appear active
-          yet. Activate them in <strong>Billing → Cost allocation tags</strong> (data lags up to 24h);
-          until then costs may show under <code>(untagged)</code>.
+          yet. Activate them in <strong>Billing → Cost allocation tags</strong> (data lags up to 24h).
         </Note>
       )}
 
-      {report && (
+      {admin && report && (
         <>
           <section style={{ ...card, marginTop: 20, display: "flex", alignItems: "baseline", gap: 16 }}>
             <span style={{ fontSize: 13, color: "#64748b" }}>
               {report.periodStart} → {report.periodEnd}
             </span>
-            <span style={{ marginLeft: "auto", fontSize: 13, color: "#64748b" }}>grand total</span>
-            <strong style={{ fontSize: 26 }}>{money(report.grandTotal, report.currency)}</strong>
+            <span style={{ marginLeft: "auto", fontSize: 13, color: "#64748b" }}>app total</span>
+            <strong style={{ fontSize: 26 }}>{money(report.grandTotal, currency)}</strong>
           </section>
 
-          {/* Monthly trend */}
           <section style={{ marginTop: 24 }}>
             <h2 style={sectionTitle}>Monthly trend</h2>
             <div style={{ ...card, display: "flex", gap: 12, alignItems: "flex-end", height: 140 }}>
               {report.months.map((m) => (
                 <div key={m.month} style={{ flex: 1, textAlign: "center" }}>
                   <div
-                    title={money(m.amount, report.currency)}
+                    title={money(m.amount, currency)}
                     style={{
                       height: `${Math.round((m.amount / maxMonth) * 90)}px`,
                       background: "#6366f1",
@@ -77,15 +97,12 @@ export default function Costs() {
                     }}
                   />
                   <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 6 }}>{m.month.slice(5)}</div>
-                  <div style={{ fontSize: 11, color: "#64748b" }}>
-                    {money(m.amount, report.currency)}
-                  </div>
+                  <div style={{ fontSize: 11, color: "#64748b" }}>{money(m.amount, currency)}</div>
                 </div>
               ))}
             </div>
           </section>
 
-          {/* Per-stage breakdown by AWS service (position) */}
           <section style={{ marginTop: 24 }}>
             <h2 style={sectionTitle}>By stage &amp; AWS position</h2>
             {report.stages.length === 0 && <Empty>No cost recorded for this app in the period.</Empty>}
@@ -94,40 +111,56 @@ export default function Costs() {
                 <div key={s.stage} style={card}>
                   <div style={{ display: "flex", alignItems: "baseline", marginBottom: 8 }}>
                     <strong style={{ fontSize: 16, color: "#e2e8f0" }}>{s.stage}</strong>
-                    <strong style={{ marginLeft: "auto", fontSize: 16 }}>
-                      {money(s.total, report.currency)}
-                    </strong>
+                    <strong style={{ marginLeft: "auto", fontSize: 16 }}>{money(s.total, currency)}</strong>
                   </div>
                   {s.services.map((svc) => (
-                    <div
-                      key={svc.service}
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 110px",
-                        gap: 10,
-                        padding: "5px 0",
-                        borderTop: "1px solid #1e293b",
-                        fontSize: 13,
-                        fontFamily: "ui-monospace, monospace",
-                      }}
-                    >
+                    <div key={svc.service} style={posRow}>
                       <span style={{ color: "#cbd5e1" }}>{svc.service}</span>
-                      <span style={{ textAlign: "right", color: "#94a3b8" }}>
-                        {money(svc.amount, report.currency)}
-                      </span>
+                      <span style={{ textAlign: "right", color: "#94a3b8" }}>{money(svc.amount, currency)}</span>
                     </div>
                   ))}
                 </div>
               ))}
             </div>
           </section>
-
-          <p style={{ color: "#475569", fontSize: 12, marginTop: 24 }}>
-            UnblendedCost · source: AWS Cost Explorer · generated{" "}
-            {new Date(report.generatedAt).toLocaleString()}
-          </p>
         </>
       )}
+
+      {/* ---- Per-project cost (admin: all; owner: only theirs) -------------- */}
+      <section style={{ marginTop: 24 }}>
+        <h2 style={sectionTitle}>
+          {admin ? "By project (estimated)" : "Your projects (estimated)"}
+        </h2>
+        {projects.length === 0 && (
+          <Empty>{admin ? "No projects yet." : "You have no projects, or no cost attributed yet."}</Empty>
+        )}
+        {projects.length > 0 && (
+          <div style={card}>
+            <div style={{ ...posRow, borderTop: "none", color: "#64748b", fontWeight: 600 }}>
+              <span>project</span>
+              <span style={{ textAlign: "right" }}>runner</span>
+              <span style={{ textAlign: "right" }}>shared</span>
+              <span style={{ textAlign: "right" }}>total</span>
+            </div>
+            {projects.map((p) => (
+              <div key={p.projectId} style={projRow}>
+                <span style={{ color: "#e2e8f0" }}>
+                  {p.name}
+                  {admin && <span style={{ color: "#64748b" }}> · {p.ownerEmail}</span>}
+                  <span style={{ color: "#475569", fontSize: 12 }}> · {p.runnerRuns} runs</span>
+                </span>
+                <span style={{ textAlign: "right", color: "#94a3b8" }}>{money(p.runnerCost, currency)}</span>
+                <span style={{ textAlign: "right", color: "#94a3b8" }}>{money(p.sharedCost, currency)}</span>
+                <span style={{ textAlign: "right", color: "#e2e8f0", fontWeight: 600 }}>{money(p.total, currency)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        <p style={{ color: "#475569", fontSize: 12, marginTop: 12 }}>
+          Estimate: Fargate/ECS cost split by runner-dispatch count; shared infra split equally per
+          project. Source: AWS Cost Explorer (UnblendedCost).
+        </p>
+      </section>
     </main>
   );
 }
@@ -145,7 +178,25 @@ const card: React.CSSProperties = {
   borderRadius: 10,
   padding: 16,
 };
-const link: React.CSSProperties = { marginLeft: "auto", color: "#818cf8", fontSize: 13, textDecoration: "none" };
+const link: React.CSSProperties = { color: "#818cf8", fontSize: 13, textDecoration: "none" };
+const posRow: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "1fr 110px",
+  gap: 10,
+  padding: "5px 0",
+  borderTop: "1px solid #1e293b",
+  fontSize: 13,
+  fontFamily: "ui-monospace, monospace",
+};
+const projRow: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "1fr 110px 110px 110px",
+  gap: 10,
+  padding: "6px 0",
+  borderTop: "1px solid #1e293b",
+  fontSize: 13,
+  fontFamily: "ui-monospace, monospace",
+};
 
 function Empty({ children }: { children: React.ReactNode }) {
   return <div style={{ padding: 16, color: "#64748b", fontSize: 14 }}>{children}</div>;
@@ -154,17 +205,7 @@ function Empty({ children }: { children: React.ReactNode }) {
 function Note({ tone, children }: { tone: "warn" | "error"; children: React.ReactNode }) {
   const c = tone === "error" ? "#f87171" : "#fbbf24";
   return (
-    <div
-      style={{
-        marginTop: 16,
-        padding: "10px 14px",
-        border: `1px solid ${c}33`,
-        background: `${c}11`,
-        borderRadius: 8,
-        color: c,
-        fontSize: 13,
-      }}
-    >
+    <div style={{ marginTop: 16, padding: "10px 14px", border: `1px solid ${c}33`, background: `${c}11`, borderRadius: 8, color: c, fontSize: 13 }}>
       {children}
     </div>
   );

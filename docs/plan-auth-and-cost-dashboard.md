@@ -46,8 +46,19 @@ SST taggt jede Ressource mit `sst:app` und `sst:stage`.
 in **Billing → Cost allocation tags** aktivieren. Vorher liefert CE alles als
 `(untagged)`; Daten haben bis zu 24 h Latenz. Das Dashboard weist darauf hin.
 
-**Öffentlich:** bewusst ohne Auth (Read-only Kostenübersicht). Enthält keine
-Secrets, nur aggregierte Kostenzahlen.
+**Rollenbasiert (Update 2026-06-05):** Das Cost-Dashboard ist jetzt **login-pflichtig**
+und rollenabhängig (ersetzt das frühere „public"):
+- **Admin** (Cognito-Gruppe `admin`, gelesen aus `cognito:groups` im IdToken):
+  sieht die App-weiten Kosten (alle Stages × Service) **und** die Kosten **pro Projekt**.
+- **Project Owner**: sieht nur die Kosten **seiner eigenen** Projekte.
+
+**Pro-Projekt-Zurechnung (Schätzung):** AWS-Kosten sind nur nach `sst:app`/`sst:stage`
+getaggt, nicht pro Projekt. Daher:
+- Jeder Runner-Dispatch erhöht einen **Usage-Zähler** je Projekt/Monat (DynamoDB
+  `USAGE#<projectId>` in der Runs-Tabelle).
+- **Fargate/ECS-Kosten** werden je Monat proportional zur Runner-Nutzung verteilt.
+- **Geteilte Infra** (alles außer Fargate) wird **gleichmäßig je Projekt** umgelegt.
+- Klar als „estimated allocation" gekennzeichnet.
 
 ## 2. Signup mit E-Mail-Bestätigung (Cognito)
 

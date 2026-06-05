@@ -1,7 +1,10 @@
 import { LabelPill } from "~/components/LabelPill";
 import { Reveal } from "~/components/Reveal";
+import { useT } from "~/i18n/context";
 
 export function Hero() {
+  const { t } = useT();
+  const h = t.hero;
   return (
     <section
       id="top"
@@ -28,35 +31,34 @@ export function Hero() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-lime opacity-75" />
                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent-lime" />
               </span>
-              sp<span className="text-accent-lime">33</span>c · Agentic coding · Human Override
+              sp<span className="text-accent-lime">33</span>c · {h.badgeSuffix}
             </span>
           </Reveal>
 
           <Reveal delay={80}>
             <h1 className="mt-6 text-balance text-5xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl">
-              Agentic coding.
+              {h.titleA}
               <br />
-              <span className="text-gradient">Driven by Jira.</span>
+              <span className="text-gradient">{h.titleB}</span>
             </h1>
           </Reveal>
 
           <Reveal delay={160}>
             <p className="mt-6 max-w-xl text-pretty text-lg leading-relaxed text-slate-400">
-              Write the story. Label it{" "}
-              <LabelPill tone="ready">#ready</LabelPill>. An autonomous Claude
-              Opus agent picks it up, implements it, runs tests and QA, and
-              opens a pull request — your spec becomes shipped code. With{" "}
+              {h.leadP1}
+              <LabelPill tone="ready">#ready</LabelPill>
+              {h.leadP2}
               <a href="#loop" className="font-medium text-violet-300 underline decoration-dotted underline-offset-2 hover:text-violet-200">
-                Human Override
+                {h.leadLink}
               </a>
-              , a human stays in command of every irreversible step.
+              {h.leadP3}
             </p>
           </Reveal>
 
           <Reveal delay={240}>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <a href="#how" className="btn-primary">
-                See how it works
+                {h.ctaPrimary}
                 <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none">
                   <path
                     d="M4 10h12m0 0-5-5m5 5-5 5"
@@ -68,18 +70,14 @@ export function Hero() {
                 </svg>
               </a>
               <a href="#loop" className="btn-ghost">
-                Human Override
+                {h.ctaGhost}
               </a>
             </div>
           </Reveal>
 
           <Reveal delay={320}>
             <dl className="mt-12 grid max-w-md grid-cols-3 gap-6 border-t border-white/10 pt-6">
-              {[
-                ["2 min", "cron cadence"],
-                ["1 microVM", "per story, isolated"],
-                ["100%", "PR-gated review"],
-              ].map(([stat, label]) => (
+              {h.stats.map(([stat, label]) => (
                 <div key={label}>
                   <dt className="font-mono text-2xl font-semibold text-white">
                     {stat}
@@ -95,7 +93,7 @@ export function Hero() {
 
         {/* Visual */}
         <Reveal delay={200} className="lg:pl-4">
-          <HeroVisual />
+          <HeroVisual v={h.visual} />
         </Reveal>
       </div>
 
@@ -104,7 +102,7 @@ export function Hero() {
 }
 
 /** A stylised "story → PR" card that hints at the pipeline. */
-function HeroVisual() {
+function HeroVisual({ v }: { v: ReturnType<typeof useT>["t"]["hero"]["visual"] }) {
   return (
     <div className="relative animate-float">
       <div className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-br from-accent/20 via-transparent to-accent-cyan/10 blur-2xl" />
@@ -115,7 +113,7 @@ function HeroVisual() {
           <span className="h-3 w-3 rounded-full bg-amber-400/70" />
           <span className="h-3 w-3 rounded-full bg-emerald-400/70" />
           <span className="ml-3 font-mono text-xs text-slate-500">
-            board: Kanban · agent run #284
+            {v.board}
           </span>
         </div>
 
@@ -129,10 +127,10 @@ function HeroVisual() {
               <LabelPill tone="ready">#ready</LabelPill>
             </div>
             <p className="mt-2 text-sm font-medium text-slate-100">
-              Add rate-limit headers to the public API
+              {v.story}
             </p>
             <p className="mt-1 text-xs leading-relaxed text-slate-500">
-              AC: return X-RateLimit-* on every 200/429; cover with tests.
+              {v.ac}
             </p>
           </div>
 
@@ -140,7 +138,7 @@ function HeroVisual() {
           <div className="flex items-center justify-center gap-2 py-0.5 text-slate-600">
             <span className="h-px flex-1 bg-gradient-to-r from-transparent to-accent/40" />
             <span className="font-mono text-[11px] text-accent">
-              agent implements →
+              {v.connector}
             </span>
             <span className="h-px flex-1 bg-gradient-to-l from-transparent to-accent/40" />
           </div>
@@ -152,19 +150,17 @@ function HeroVisual() {
               <span className="text-slate-300">feat/proj-142</span>
             </p>
             <p className="text-slate-400">
-              <span className="text-accent-lime">✓</span> implemented · 4 files
-              changed
+              <span className="text-accent-lime">✓</span> {v.implemented}
             </p>
             <p className="text-slate-400">
-              <span className="text-accent-lime">✓</span> tests passed{" "}
+              <span className="text-accent-lime">✓</span> {v.testsPassed}{" "}
               <span className="text-slate-600">(12/12)</span>
             </p>
             <p className="text-slate-400">
-              <span className="text-accent-lime">✓</span> QA: edge cases +
-              regressions clean
+              <span className="text-accent-lime">✓</span> {v.qa}
             </p>
             <p className="text-slate-300">
-              <span className="text-accent-violet">→</span> opened PR{" "}
+              <span className="text-accent-violet">→</span> {v.openedPr}{" "}
               <span className="underline decoration-dotted">#318</span>
             </p>
           </div>

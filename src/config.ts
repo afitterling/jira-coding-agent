@@ -20,11 +20,13 @@ export interface Tenant {
   model: string;
   /** Repo the agent operates on for this tenant (used by the Fargate runner). */
   targetRepo?: string;
+  /** GitHub token for cloning + opening PRs (used by the Fargate runner). */
+  githubToken?: string;
 }
 
-const normHost = (h: string) => h.replace(/^https?:\/\//, "").replace(/\/$/, "");
+export const normHost = (h: string) => h.replace(/^https?:\/\//, "").replace(/\/$/, "");
 
-function defaultJql(): string {
+export function defaultJql(): string {
   const { revise, ready, implemented, tested } = labels;
   return `(labels in ("${revise}", "${ready}", "${implemented}", "${tested}")) ORDER BY updated DESC`;
 }
@@ -52,9 +54,13 @@ export function loadTenants(): Tenant[] {
         jql: t.jql || defaultJql(),
         model: t.model || sharedModel,
         targetRepo: t.targetRepo,
+        githubToken: t.githubToken || process.env.GITHUB_TOKEN,
       };
     });
   }
+  // No env-based Jira config — tenants come solely from the Projects table
+  // (see src/projects.ts). Don't throw; just contribute no env tenant.
+  if (!process.env.JIRA_HOST) return [];
   // Single-tenant fallback.
   return [
     {
@@ -63,6 +69,7 @@ export function loadTenants(): Tenant[] {
       jql: process.env.JIRA_JQL || defaultJql(),
       model: sharedModel,
       targetRepo: process.env.TARGET_REPO,
+      githubToken: process.env.GITHUB_TOKEN,
     },
   ];
 }
