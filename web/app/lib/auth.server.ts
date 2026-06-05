@@ -17,6 +17,24 @@ const CLIENT_ID = process.env.COGNITO_CLIENT_ID ?? "";
 export interface SessionUser {
   email: string;
   idToken: string;
+  /** Cognito groups from the IdToken (e.g. ["admin"]). */
+  groups: string[];
+}
+
+/** Admins (Cognito group "admin") see all costs; everyone else only their own. */
+export function isAdmin(user: SessionUser | null): boolean {
+  return !!user?.groups?.includes("admin");
+}
+
+/** Decode a JWT payload (no signature verification — only for reading own claims). */
+function decodeJwt(token: string): Record<string, unknown> {
+  try {
+    const part = token.split(".")[1] ?? "";
+    const json = Buffer.from(part.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8");
+    return JSON.parse(json);
+  } catch {
+    return {};
+  }
 }
 
 export const sessionCookie = createCookie("jca_session", {
@@ -119,7 +137,11 @@ export async function login(
     );
     const idToken = res.AuthenticationResult?.IdToken;
     if (!idToken) return { ok: false, error: "Login failed — no token returned." };
-    return { ok: true, user: { email, idToken } };
+    const claims = decodeJwt(idToken);
+    const groups = Array.isArray(claims["cognito:groups"])
+      ? (claims["cognito:groups"] as string[])
+      : [];
+    return { ok: true, user: { email, idToken, groups } };
   } catch (e) {
     if ((e as { name?: string })?.name === "UserNotConfirmedException") {
       return { ok: false, error: "Please confirm your email first.", needsConfirmation: true };

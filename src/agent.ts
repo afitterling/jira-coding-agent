@@ -11,7 +11,7 @@ import {
 import { createJira, type Jira, type Story } from "./jira.js";
 import { createLlm } from "./llm.js";
 import { loadProjectTenants } from "./projects.js";
-import { Run, type Stage } from "./store.js";
+import { Run, recordRunnerUsage, type Stage } from "./store.js";
 
 const has = (s: Story, label: string) => s.labels.includes(label);
 
@@ -179,4 +179,6 @@ async function dispatchRunner(tenant: Tenant, story: Story): Promise<void> {
     GITHUB_TOKEN: tenant.githubToken ?? "",
     ANTHROPIC_MODEL: tenant.model,
   });
+  // Count this dispatch for per-project Fargate cost attribution.
+  await recordRunnerUsage(tenant.id, new Date().toISOString());
 }

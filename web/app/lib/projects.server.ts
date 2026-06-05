@@ -6,6 +6,7 @@ import {
   GetCommand,
   PutCommand,
   QueryCommand,
+  ScanCommand,
 } from "@aws-sdk/lib-dynamodb";
 import {
   CreateSecretCommand,
@@ -63,6 +64,14 @@ export async function listProjects(email: string): Promise<Project[]> {
     repoUrl: i.repoUrl,
     createdAt: i.createdAt,
   }));
+}
+
+/** Every project across all owners (admin view + cost attribution). */
+export async function listAllProjects(): Promise<{ projectId: string; name: string; ownerEmail: string }[]> {
+  const res = await doc.send(new ScanCommand({ TableName: TABLE }));
+  return (res.Items ?? [])
+    .filter((i) => i.projectId)
+    .map((i) => ({ projectId: i.projectId, name: i.name, ownerEmail: i.ownerEmail }));
 }
 
 export async function createProject(email: string, input: NewProject): Promise<Project> {

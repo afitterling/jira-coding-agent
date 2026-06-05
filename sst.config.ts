@@ -95,6 +95,13 @@ export default $config({
         },
       },
     });
+    // Members of this group are admins (see all costs across projects). Add users
+    // via the console or `aws cognito-idp admin-add-user-to-group`.
+    new aws.cognito.UserGroup("AdminGroup", {
+      userPoolId: userPool.id,
+      name: "admin",
+      description: "Can view all AWS costs and per-project cost across all owners",
+    });
 
     // --- Network + cluster for the runner ------------------------------------
     // NAT lets the Fargate task reach api.anthropic.com / git hosts from a
