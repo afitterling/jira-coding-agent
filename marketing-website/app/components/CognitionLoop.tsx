@@ -7,7 +7,7 @@ const CX = 340;
 const CY = 320;
 const RING = 170; // radius nodes sit on
 const BUBBLE = 40; // node bubble radius
-const HUB = 88; // centre hub radius
+const HUB = 98; // centre hub radius
 const BOUND = 296; // dashed boundary radius
 const LABEL = 232; // radius for stage labels
 
@@ -29,6 +29,10 @@ export function CognitionLoop() {
   const { t } = useT();
   const c = t.cognition;
   const stages = STAGE_META.map((m, i) => ({ ...m, ...c.stages[i] }));
+  // the objective the core stays anchored to, on one line
+  const objective = c.centerLines
+    .map((s) => s.replace(/\s*\/\s*$/, ""))
+    .join(" · ");
   // arrowheads sit halfway between nodes, pointing clockwise along the ring
   const arrows = [36, 108, 180, 252, 324];
 
@@ -125,7 +129,22 @@ export function CognitionLoop() {
                   />
                 ))}
 
-                {/* centre hub */}
+                {/* spokes — every module feeds the core */}
+                {stages.map((s) => (
+                  <line
+                    key={`spoke-${s.name}`}
+                    x1={px(s.angle, RING - BUBBLE - 2)}
+                    y1={py(s.angle, RING - BUBBLE - 2)}
+                    x2={px(s.angle, HUB + 2)}
+                    y2={py(s.angle, HUB + 2)}
+                    stroke="url(#cog-flow)"
+                    strokeOpacity="0.22"
+                    strokeWidth="1.4"
+                    strokeDasharray="3 5"
+                  />
+                ))}
+
+                {/* cognition core — the master brain you interact with */}
                 <circle
                   cx={CX}
                   cy={CY}
@@ -133,25 +152,81 @@ export function CognitionLoop() {
                   fill="url(#cog-hub)"
                   stroke="url(#cog-flow)"
                   strokeWidth="1.5"
-                  strokeOpacity="0.6"
+                  strokeOpacity="0.75"
+                />
+                <circle
+                  cx={CX}
+                  cy={CY}
+                  r={HUB - 9}
+                  fill="none"
+                  stroke="#ffffff"
+                  strokeOpacity="0.06"
+                  strokeWidth="1"
+                />
+                <g
+                  transform={`translate(${CX} ${CY - 46}) scale(0.82)`}
+                  fill="none"
+                  stroke="#c4b5fd"
+                  strokeWidth="1.9"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <StageIcon kind="brain" />
+                </g>
+                <text
+                  x={CX}
+                  y={CY - 8}
+                  textAnchor="middle"
+                  className="fill-white font-bold"
+                  style={{ fontSize: 17 }}
+                >
+                  {c.coreLabel}
+                </text>
+                <text
+                  x={CX}
+                  y={CY + 8}
+                  textAnchor="middle"
+                  className="fill-violet-300 font-mono"
+                  style={{ fontSize: 8.5, letterSpacing: "0.06em" }}
+                >
+                  {c.coreTagline}
+                </text>
+                <line
+                  x1={CX - 48}
+                  y1={CY + 18}
+                  x2={CX + 48}
+                  y2={CY + 18}
+                  stroke="#ffffff"
+                  strokeOpacity="0.1"
+                  strokeWidth="1"
                 />
                 <text
                   x={CX}
-                  y={CY}
+                  y={CY + 36}
                   textAnchor="middle"
-                  className="fill-white font-semibold"
-                  style={{ fontSize: 16 }}
+                  className="fill-slate-400"
+                  style={{ fontSize: 11 }}
                 >
-                  {c.centerLines.map((line, i) => (
-                    <tspan
-                      key={line}
-                      x={CX}
-                      dy={i === 0 ? -((c.centerLines.length - 1) * 11) : 22}
-                    >
-                      {line}
-                    </tspan>
-                  ))}
+                  {objective}
                 </text>
+
+                {/* input arrowheads — modules flowing into the core */}
+                {stages.map((s) => (
+                  <path
+                    key={`in-${s.name}`}
+                    d="M -5 -5 L 6 0 L -5 5"
+                    fill="none"
+                    stroke="url(#cog-flow)"
+                    strokeWidth="2"
+                    strokeOpacity="0.85"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    transform={`translate(${px(s.angle, HUB + 14)} ${py(
+                      s.angle,
+                      HUB + 14,
+                    )}) rotate(${s.angle + 90})`}
+                  />
+                ))}
 
                 {/* nodes */}
                 {stages.map((s) => {

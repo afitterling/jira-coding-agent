@@ -139,7 +139,9 @@ export const en = {
     titleLead: "A relentless mind. ",
     titleAccent: "On your leash.",
     intro:
-      "Every run is one closed cognitive loop — perceive, interpret, decide, act, learn — anchored to a single objective and fenced by boundaries you set. The agent thinks at machine speed; it never thinks outside the lines.",
+      "Every run is one closed cognitive loop — perceive, interpret, decide, act, learn. At its centre sits the cognition core: the master brain that fuses inputs from every module — and the single core you interact with. It anchors each turn to one objective, stays fenced by boundaries you set, thinks at machine speed, and never thinks outside the lines.",
+    coreLabel: "Cognition Core",
+    coreTagline: "the core you interact with",
     centerLines: ["Goal /", "Context /", "Task Objective"],
     stages: [
       {

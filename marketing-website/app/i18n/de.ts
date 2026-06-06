@@ -137,7 +137,9 @@ export const de: Content = {
     titleLead: "Ein unermüdlicher Verstand. ",
     titleAccent: "An Ihrer Leine.",
     intro:
-      "Jeder Lauf ist eine geschlossene kognitive Schleife — wahrnehmen, interpretieren, entscheiden, handeln, lernen — verankert an einem einzigen Ziel und eingezäunt von Grenzen, die Sie setzen. Der Agent denkt in Maschinengeschwindigkeit; aber nie über die Linien hinaus.",
+      "Jeder Lauf ist eine geschlossene kognitive Schleife — wahrnehmen, interpretieren, entscheiden, handeln, lernen. In ihrem Zentrum sitzt der Cognition Core: das Master-Brain, das Eingaben aus jedem Modul bündelt — und der eine Core, mit dem Sie interagieren. Er verankert jeden Durchlauf an einem Ziel, bleibt innerhalb der Grenzen, die Sie setzen, denkt in Maschinengeschwindigkeit und nie über die Linien hinaus.",
+    coreLabel: "Cognition Core",
+    coreTagline: "der Core, mit dem Sie interagieren",
     centerLines: ["Ziel /", "Kontext /", "Aufgabe"],
     stages: [
       {
