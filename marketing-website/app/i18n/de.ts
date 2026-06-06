@@ -26,6 +26,7 @@ export const de: Content = {
       "Synapse",
       "Über uns",
     ],
+    pricing: "Preise",
     cta: "Den Ablauf ansehen",
     github: "GitHub",
     toggleLabel: "Sprache",
@@ -310,6 +311,76 @@ export const de: Content = {
         bullets: [],
       },
     ],
+  },
+
+  pricing: {
+    tag: "Preise",
+    heading: "Preise, die von Testphase bis Produktion mitwachsen.",
+    intro:
+      "Wählen Sie das Modell, das zu Ihrem Team passt. Jede Stufe zeigt klar, was enthalten ist und was nicht.",
+    plans: [
+      {
+        name: "Kostenlose Testphase",
+        price: "Kostenlos",
+        cadence: "für 2 Wochen",
+        description:
+          "Testen Sie das vollständige Produkt zwei Wochen lang, bevor Sie sich festlegen.",
+        included: [
+          "2 Wochen Vollzugriff",
+          "Alle Kernfunktionen des Coding-Workflows",
+          "Grundlegende Onboarding-Dokumentation",
+        ],
+        excluded: ["Kein SLA", "Kein dedizierter Support-Kanal"],
+      },
+      {
+        name: "Pay-per-use",
+        price: "Pay-per-use",
+        cadence: "verbrauchsbasierte Abrechnung",
+        description:
+          "Sie zahlen nur, was Sie wirklich ausführen. Ideal bei schwankender Last.",
+        included: [
+          "Nutzungsbasierte Abrechnung",
+          "Alle Kernfunktionen des Coding-Workflows",
+          "Keine monatliche Bindung",
+        ],
+        excluded: ["Kein monatliches Cap enthalten", "Kein Enterprise-Onboarding"],
+      },
+      {
+        name: "Limited",
+        price: "100 €/Monat oder 200 €/Monat",
+        cadence: "limitiertes Paket",
+        description:
+          "Monatlich gedeckelte Pakete mit planbaren Kosten für kleinere Teams.",
+        included: [
+          "Fixe monatliche Budgetoptionen",
+          "Alle Kernfunktionen des Coding-Workflows",
+          "Priorität vor der Trial-Warteschlange",
+        ],
+        excluded: ["Kein Enterprise-Throughput-Bundle", "Kein dedizierter TAM"],
+      },
+      {
+        name: "Enterprise",
+        price: "5.000 €/Monat",
+        cadence: "fester Monatspreis",
+        description:
+          "Hoher Durchsatz und Zusammenarbeit auf Enterprise-Niveau.",
+        included: [
+          "Höchste Ausführungskapazität",
+          "Alle Kernfunktionen des Coding-Workflows",
+          "Priorisierter Support + Onboarding",
+        ],
+        excluded: [
+          "Individuelle Legal-/Compliance-Umfänge werden separat bewertet",
+        ],
+      },
+    ],
+    matrixHeading: "Feature-Abdeckung: was drin ist und was nicht",
+    matrixIntro:
+      "Alle aktuell auf dieser Website gezeigten Features sind unten aufgelistet. Ein Häkchen bedeutet enthalten; ein Kreuz bedeutet nicht enthalten.",
+    featureColumn: "Feature",
+    inLabel: "Drin",
+    outLabel: "Raus",
+    columns: ["Testphase", "Pay-per-use", "Limited", "Enterprise"],
   },
 
   screenshots: {

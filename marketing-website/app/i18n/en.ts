@@ -28,6 +28,7 @@ export const en = {
       "Synapse",
       "About",
     ],
+    pricing: "Pricing",
     cta: "See the flow",
     github: "GitHub",
     toggleLabel: "Language",
@@ -312,6 +313,74 @@ export const en = {
         bullets: [],
       },
     ],
+  },
+
+  pricing: {
+    tag: "Pricing",
+    heading: "Pricing that scales from trial to production.",
+    intro:
+      "Pick the model that fits your team. Every tier below shows what is in and what is out.",
+    plans: [
+      {
+        name: "Free trial",
+        price: "Free",
+        cadence: "for 2 weeks",
+        description:
+          "Try the complete product for two weeks before you commit.",
+        included: [
+          "2-week full access",
+          "All core coding workflow features",
+          "Basic onboarding docs",
+        ],
+        excluded: ["No SLA", "No dedicated support channel"],
+      },
+      {
+        name: "Pay-per-use",
+        price: "Pay-per-use",
+        cadence: "metered billing",
+        description:
+          "Only pay for what you run. Best for variable demand.",
+        included: [
+          "Usage-based billing",
+          "All core coding workflow features",
+          "No monthly commitment",
+        ],
+        excluded: ["No monthly cap included", "No enterprise onboarding"],
+      },
+      {
+        name: "Limited",
+        price: "€100/month or €200/month",
+        cadence: "limited plan",
+        description:
+          "Capped monthly options with predictable spend for smaller teams.",
+        included: [
+          "Fixed monthly budget options",
+          "All core coding workflow features",
+          "Priority over trial queue",
+        ],
+        excluded: ["No enterprise throughput bundle", "No dedicated TAM"],
+      },
+      {
+        name: "Enterprise",
+        price: "€5,000/month",
+        cadence: "flat monthly",
+        description:
+          "High-throughput execution and enterprise-grade collaboration.",
+        included: [
+          "Highest execution capacity",
+          "All core coding workflow features",
+          "Priority support + onboarding",
+        ],
+        excluded: ["Custom legal/compliance scopes handled separately"],
+      },
+    ],
+    matrixHeading: "Feature coverage: what's in and what's out",
+    matrixIntro:
+      "All features currently presented on this website are listed below. A check means the feature is in; a cross means it is out.",
+    featureColumn: "Feature",
+    inLabel: "In",
+    outLabel: "Out",
+    columns: ["Free trial", "Pay-per-use", "Limited", "Enterprise"],
   },
 
   screenshots: {
