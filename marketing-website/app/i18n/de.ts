@@ -24,6 +24,7 @@ export const de: Content = {
       "KI-Modelle",
       "Anwendungsfälle",
       "Synapse",
+      "FAQ",
       "Über uns",
     ],
     cta: "Den Ablauf ansehen",
@@ -381,6 +382,27 @@ export const de: Content = {
         ["0", "Fehlschläge"],
       ],
     },
+  },
+
+  faq: {
+    tag: "FAQ",
+    heading: "Fragen, die sich lohnen.",
+    intro:
+      "Die ehrlichen Antworten — was der Agent ist, was nicht, und wo Sie weiterhin ins Spiel kommen.",
+    items: [
+      {
+        q: "Ersetzt das einen Entwickler?",
+        a: "Nein — und das ist auch nicht das Ziel. Der Agent ist ein Kraftverstärker, kein Stellenabbau. Er schreibt Code, führt Tests aus und öffnet Pull Requests, doch jede unumkehrbare Entscheidung gehört einem Menschen, der das System versteht. Sie brauchen weiterhin einen Security-Architekten, der Threat-Model und Leitplanken setzt, einen Security-Operations-Engineer, der beobachtet, was ausgeliefert wird, und reagiert, wenn sich etwas bewegt, und einen erfahrenen Cloud-native-Engineer, der die Architektur verantwortet, die Diffs prüft und die Fehlerfälle erkennt, die ein Modell nicht sieht. Der Agent leistet die unermüdliche Arbeit; qualifizierte Menschen tragen Urteilsvermögen, Sicherheitslage und Verantwortung.",
+      },
+      {
+        q: "Zahle ich für einen Entwickler oder für das Tool?",
+        a: "Sie zahlen nur für das Tool. Kein Dienstleister, kein Seat, kein Gehalt. Es ist ein hocheffizientes Instrument, und wie jedes Instrument belohnt es Meisterschaft: Der Wert liegt in Ihrem Kopf — darin, wie gut Sie die Spezifikation formulieren und die Arbeit organisieren. Je schärfer Ihre Akzeptanzkriterien und je besser Sie die Schleife orchestrieren, desto mehr gibt es zurück. Je effizienter Sie es steuern, desto effizienter wird es für Sie.",
+      },
+      {
+        q: "Ersetzt das das Team?",
+        a: "Manche würden Ja sagen. Das stimmt nicht — Ihr Team hat einfach andere Arbeit. Die Menschen, die früher das Ergebnis von Hand produziert haben, rücken in der Kette nach oben: in die Planung, in die Architektur, in das Skizzieren des Produkts selbst. Halten Sie Ihre Leute. Mensch plus KI ist das stärkste Team, das es gibt. KI ist nicht hier, um uns zu ersetzen; sie ist hier, um von uns genutzt zu werden — und nur Menschen können das.",
+      },
+    ],
   },
 
   about: {

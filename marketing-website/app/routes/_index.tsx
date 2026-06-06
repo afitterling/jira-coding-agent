@@ -3,6 +3,7 @@ import { CognitionLoop } from "~/components/CognitionLoop";
 import { DataConnectivity } from "~/components/DataConnectivity";
 import { Deck } from "~/components/Deck";
 import { Diagrams } from "~/components/Diagrams";
+import { Faq } from "~/components/Faq";
 import { Features } from "~/components/Features";
 import { Footer } from "~/components/Footer";
 import { Hero } from "~/components/Hero";
@@ -28,6 +29,7 @@ export default function Index() {
         <Diagrams />
         <Features />
         <Screenshots />
+        <Faq />
         <About />
       </main>
       <Footer />

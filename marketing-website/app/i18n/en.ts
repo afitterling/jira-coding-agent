@@ -26,6 +26,7 @@ export const en = {
       "AI Models",
       "Use cases",
       "Synapse",
+      "FAQ",
       "About",
     ],
     cta: "See the flow",
@@ -383,6 +384,27 @@ export const en = {
         ["0", "failures"],
       ],
     },
+  },
+
+  faq: {
+    tag: "FAQ",
+    heading: "Questions worth asking.",
+    intro:
+      "The honest answers — on what the agent is, what it isn't, and where you still come in.",
+    items: [
+      {
+        q: "Does this replace a developer?",
+        a: "No — and it isn't trying to. The agent is a force multiplier, not a headcount. It writes code, runs tests, and opens pull requests, but every irreversible decision still belongs to a human who understands the system. You still want a security architect to set the threat model and the guardrails, a security-operations engineer to watch what ships and respond when something moves, and a senior cloud-native engineer to own the architecture, review the diffs, and catch the failure modes a model can't see. The agent does the relentless work; skilled people own the judgement, the security posture, and the accountability.",
+      },
+      {
+        q: "Do I pay for a developer, or for the tool?",
+        a: "You pay for the tool — only. No contractor, no seat, no salary. It's a highly efficient instrument, and like any instrument it rewards mastery: the value lives in your head, in how well you frame the spec and organize the work. The sharper your acceptance criteria and the better you orchestrate the loop, the more it gives back. The more efficient you get at driving it, the more efficient it becomes for you.",
+      },
+      {
+        q: "Does this replace the team?",
+        a: "Some would argue yes. It's not true — your team simply has different work. The people who used to hand-produce the output move up the chain: into planning, into architecture, into sketching the product itself. Hold on to your people. Human plus AI is the strongest team there is. AI isn't here to replace us; it's here to be leveraged by us — and only humans can do the leveraging.",
+      },
+    ],
   },
 
   about: {

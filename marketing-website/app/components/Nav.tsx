@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { LanguageToggle } from "~/components/LanguageToggle";
 import { useT } from "~/i18n/context";
 
-const LINK_HREFS = ["#how", "#loop", "#interfaces", "#use-cases", "#data", "#about"];
+const LINK_HREFS = ["#how", "#loop", "#interfaces", "#use-cases", "#data", "#faq", "#about"];
 
 const REPO_URL = "https://github.com/afitterling/jira-coding-agent";
 
