@@ -132,6 +132,41 @@ export const de: Content = {
     closingNote: "in Maschinengeschwindigkeit liefern · nach menschlichem Urteil freigeben",
   },
 
+  cognition: {
+    tag: "Kontrollierte Kognition",
+    titleLead: "Ein unermüdlicher Verstand. ",
+    titleAccent: "An Ihrer Leine.",
+    intro:
+      "Jeder Lauf ist eine geschlossene kognitive Schleife — wahrnehmen, interpretieren, entscheiden, handeln, lernen — verankert an einem einzigen Ziel und eingezäunt von Grenzen, die Sie setzen. Der Agent denkt in Maschinengeschwindigkeit; aber nie über die Linien hinaus.",
+    centerLines: ["Ziel /", "Kontext /", "Aufgabe"],
+    stages: [
+      {
+        name: "Wahrnehmen",
+        body: "Liest die Jira-Story, das Repo und die Akzeptanzkriterien — den vollständigen Zustand der Welt, in der gehandelt wird.",
+      },
+      {
+        name: "Interpretieren",
+        body: "Verwandelt rohen Kontext in Bedeutung: was die Spezifikation wirklich verlangt und was die Codebasis bereits leistet.",
+      },
+      {
+        name: "Schlussfolgern / Entscheiden",
+        body: "Plant die Änderung, wägt Trade-offs ab und wählt den kürzesten Weg zu einem bestandenen Pull Request.",
+      },
+      {
+        name: "Handeln",
+        body: "Schreibt den Code, führt die Tests aus und öffnet den PR — Arbeit, kein Geschwätz, in einer isolierten microVM.",
+      },
+      {
+        name: "Lernen / Aktualisieren",
+        body: "Führt Test-, QA- und Review-Feedback in den nächsten Durchlauf zurück — geschärft bei jedem #revise.",
+      },
+    ],
+    boundaryLabel: "Human-Override-Grenze",
+    boundaryTitle: "Die Schleife läuft innerhalb Ihrer Linien.",
+    boundaryBody:
+      "Labels öffnen das Gate, der Pull Request ist die Wand, und Ihr Veto stoppt die Schleife beim nächsten 2-Minuten-Takt. Autonomie ist der Motor; Ihre Grenze ist das Chassis.",
+  },
+
   interfaces: {
     badge: "KI-Schnittstellen",
     titleLead: "Binden Sie ",

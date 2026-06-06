@@ -1,4 +1,5 @@
 import { About } from "~/components/About";
+import { CognitionLoop } from "~/components/CognitionLoop";
 import { DataConnectivity } from "~/components/DataConnectivity";
 import { Deck } from "~/components/Deck";
 import { Diagrams } from "~/components/Diagrams";
@@ -20,6 +21,7 @@ export default function Index() {
         <Hero />
         <HowItWorks />
         <HumanLoop />
+        <CognitionLoop />
         <Interfaces />
         <UseCases />
         <DataConnectivity />

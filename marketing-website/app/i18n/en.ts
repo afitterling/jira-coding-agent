@@ -134,6 +134,41 @@ export const en = {
     closingNote: "ship at machine speed · approve at human judgement",
   },
 
+  cognition: {
+    tag: "Controlled cognition",
+    titleLead: "A relentless mind. ",
+    titleAccent: "On your leash.",
+    intro:
+      "Every run is one closed cognitive loop — perceive, interpret, decide, act, learn — anchored to a single objective and fenced by boundaries you set. The agent thinks at machine speed; it never thinks outside the lines.",
+    centerLines: ["Goal /", "Context /", "Task Objective"],
+    stages: [
+      {
+        name: "Perceive",
+        body: "Reads the Jira story, the repo, and the acceptance criteria — the full state of the world it must act on.",
+      },
+      {
+        name: "Interpret",
+        body: "Turns raw context into meaning: what the spec actually asks, and what the codebase already does.",
+      },
+      {
+        name: "Reason / Decide",
+        body: "Plans the change, weighs trade-offs, and chooses the shortest path to a passing pull request.",
+      },
+      {
+        name: "Act",
+        body: "Writes the code, runs the tests, and opens the PR — work, not chatter, inside an isolated microVM.",
+      },
+      {
+        name: "Learn / Update",
+        body: "Folds test, QA, and review feedback back into the next pass — sharpened on every #revise.",
+      },
+    ],
+    boundaryLabel: "Human Override boundary",
+    boundaryTitle: "The loop runs inside your lines.",
+    boundaryBody:
+      "Labels open the gate, the pull request is the wall, and your veto stops the loop on the next 2-minute tick. Autonomy is the engine; your boundary is the chassis.",
+  },
+
   interfaces: {
     badge: "AI Interfaces",
     titleLead: "Plug in ",
