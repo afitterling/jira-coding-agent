@@ -1,7 +1,9 @@
 import { createCookie } from "@remix-run/node";
 import {
+  ConfirmForgotPasswordCommand,
   CognitoIdentityProviderClient,
   ConfirmSignUpCommand,
+  ForgotPasswordCommand,
   InitiateAuthCommand,
   ResendConfirmationCodeCommand,
   SignUpCommand,
@@ -120,6 +122,35 @@ export async function resendCode(email: string): Promise<AuthResult> {
     return { ok: true };
   } catch (e) {
     return { ok: false, error: friendly(e) };
+  }
+
+  export async function requestPasswordReset(email: string): Promise<AuthResult> {
+    try {
+      await idp.send(new ForgotPasswordCommand({ ClientId: CLIENT_ID, Username: email }));
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: friendly(e) };
+    }
+  }
+
+  export async function confirmPasswordReset(
+    email: string,
+    code: string,
+    newPassword: string,
+  ): Promise<AuthResult> {
+    try {
+      await idp.send(
+        new ConfirmForgotPasswordCommand({
+          ClientId: CLIENT_ID,
+          Username: email,
+          ConfirmationCode: code,
+          Password: newPassword,
+        }),
+      );
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: friendly(e) };
+    }
   }
 }
 

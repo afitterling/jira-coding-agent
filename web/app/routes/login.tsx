@@ -43,6 +43,9 @@ export default function Login() {
           {busy ? "Logging in…" : "Log in"}
         </button>
       </Form>
+      <p style={{ color: "#64748b", fontSize: 13, marginTop: 10, marginBottom: 0 }}>
+        Forgot your password? <a href={`/reset-password?email=${encodeURIComponent(email)}`} style={{ color: "#818cf8" }}>Reset it</a>
+      </p>
       <p style={{ color: "#64748b", fontSize: 13, marginTop: 16 }}>
         No account? <a href="/signup" style={{ color: "#818cf8" }}>Sign up</a>
       </p>

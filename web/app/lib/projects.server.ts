@@ -24,21 +24,30 @@ const SECRET_PREFIX = process.env.SECRET_PREFIX ?? "jira-coding-agent/project";
 export interface Project {
   projectId: string;
   name: string;
+  stack: "aws" | "azure";
   jiraHost: string;
   jiraEmail: string;
   jql?: string;
+  repoUrls: string[];
   repoUrl?: string;
   createdAt: string;
 }
 
 export interface NewProject {
   name: string;
+  stack: "aws" | "azure";
   jiraHost: string;
   jiraEmail: string;
   jiraToken: string;
   jql?: string;
-  repoUrl?: string;
+  repoUrls: string[];
   githubToken?: string;
+  awsAccessKeyId?: string;
+  awsSecretAccessKey?: string;
+  azureTenantId?: string;
+  azureClientId?: string;
+  azureClientSecret?: string;
+  azureSubscriptionId?: string;
 }
 
 const pk = (email: string) => `U#${email}`;
@@ -58,9 +67,15 @@ export async function listProjects(email: string): Promise<Project[]> {
   return (res.Items ?? []).map((i) => ({
     projectId: i.projectId,
     name: i.name,
+    stack: (i.stack === "azure" ? "azure" : "aws") as "aws" | "azure",
     jiraHost: i.jiraHost,
     jiraEmail: i.jiraEmail,
     jql: i.jql,
+    repoUrls: Array.isArray(i.repoUrls)
+      ? i.repoUrls.filter((u: unknown): u is string => typeof u === "string" && u.trim().length > 0)
+      : i.repoUrl
+      ? [String(i.repoUrl)]
+      : [],
     repoUrl: i.repoUrl,
     createdAt: i.createdAt,
   }));
@@ -85,6 +100,12 @@ export async function createProject(email: string, input: NewProject): Promise<P
       SecretString: JSON.stringify({
         jiraToken: input.jiraToken,
         githubToken: input.githubToken ?? "",
+        awsAccessKeyId: input.awsAccessKeyId ?? "",
+        awsSecretAccessKey: input.awsSecretAccessKey ?? "",
+        azureTenantId: input.azureTenantId ?? "",
+        azureClientId: input.azureClientId ?? "",
+        azureClientSecret: input.azureClientSecret ?? "",
+        azureSubscriptionId: input.azureSubscriptionId ?? "",
       }),
     }),
   );
@@ -100,10 +121,12 @@ export async function createProject(email: string, input: NewProject): Promise<P
         projectId,
         ownerEmail: email,
         name: input.name,
+        stack: input.stack,
         jiraHost: normHost(input.jiraHost),
         jiraEmail: input.jiraEmail,
         jql: input.jql || undefined,
-        repoUrl: input.repoUrl || undefined,
+        repoUrls: input.repoUrls,
+        repoUrl: input.repoUrls[0] || undefined,
         secretArn: secret.ARN,
         createdAt,
       },
@@ -113,10 +136,12 @@ export async function createProject(email: string, input: NewProject): Promise<P
   return {
     projectId,
     name: input.name,
+    stack: input.stack,
     jiraHost: normHost(input.jiraHost),
     jiraEmail: input.jiraEmail,
     jql: input.jql,
-    repoUrl: input.repoUrl,
+    repoUrls: input.repoUrls,
+    repoUrl: input.repoUrls[0],
     createdAt,
   };
 }
