@@ -29,7 +29,10 @@ export function LanguageToggle({ className = "" }: { className?: string }) {
           name="locale"
           defaultValue={locale}
           aria-label={t.nav.toggleLabel}
-          onChange={(event) => submit(event.currentTarget.form)}
+          onChange={(event) => {
+            const form = event.currentTarget.form;
+            if (form) submit(form);
+          }}
           className="appearance-none bg-transparent pr-5 font-mono text-xs font-semibold text-slate-200 outline-none"
         >
           {SUPPORTED_LOCALES.map((code) => (
@@ -56,7 +59,7 @@ export function LanguageToggle({ className = "" }: { className?: string }) {
 
 function GlobeIcon({ className = "" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none">
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
       <path
         d="M12 21c4.97 0 9-4.03 9-9s-4.03-9-9-9-9 4.03-9 9 4.03 9 9 9Z"
         stroke="currentColor"
@@ -75,7 +78,7 @@ function GlobeIcon({ className = "" }: { className?: string }) {
 
 function ChevronIcon({ className = "" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 16 16" className={className} fill="none" aria-hidden>
+    <svg viewBox="0 0 16 16" className={className} fill="none" aria-hidden="true">
       <path
         d="m4 6 4 4 4-4"
         stroke="currentColor"
