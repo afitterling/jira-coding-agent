@@ -31,3 +31,20 @@ statuses, and transitions are unambiguous.
 - Capture as a diagram + written spec.
 
 **Done when:** the flow is documented and matches the implemented pipeline.
+
+## 3. Add Haystack + LangChain RAG layer (Fargate-first)
+**Status:** open
+
+Introduce Haystack and LangChain pipelines on AWS Fargate to support
+retrieval-augmented generation (RAG) and complex LLM query orchestration.
+Start by embedding this capability in the marketing website messaging in both
+English and German, and keep language switching in the top navigation as an
+icon-based dropdown.
+
+- Position Haystack + LangChain as the retrieval/reasoning layer in Synapse and
+  use-case sections.
+- Ensure EN/DE copy stays structurally aligned for type-safe i18n.
+- Keep the language switcher accessible and compact across desktop/mobile nav.
+
+**Done when:** marketing copy and locale UX communicate the requirement clearly,
+and backend integration work can proceed against this documented target.

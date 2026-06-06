@@ -164,11 +164,15 @@ export const en = {
     titleLead: "One agentic engine. ",
     titleAccent: "Any mission.",
     intro:
-      "The same label-driven, human-in-the-loop loop that ships code can run investment research, data pipelines, and back-office workflows — then store and analyse everything it produces.",
+      "The same label-driven, human-in-the-loop loop that ships code can run investment research, data pipelines, retrieval-augmented generation, and complex LLM query workflows — then store and analyse everything it produces.",
     items: [
       {
         title: "Agentic coding",
         body: "The flagship: a Jira story labelled #ready becomes a tested, QA'd, reviewed pull request.",
+      },
+      {
+        title: "RAG & complex LLM queries",
+        body: "Haystack + LangChain pipelines run on isolated Fargate tasks so agents can retrieve domain context, augment prompts, and reason across multi-step questions.",
       },
       {
         title: "Investing & capital markets",
@@ -192,7 +196,7 @@ export const en = {
     introP1: "Agents are only as good as what they can reach. ",
     introName: "Synapse",
     introP2:
-      " is the connective layer: plug in a source, it gets ingested, normalised, stored, and reasoned over — then delivered through any of the output interfaces below.",
+      " is the connective layer: plug in a source, it gets ingested, normalised, indexed for retrieval, and reasoned over by Haystack + LangChain on Fargate — then delivered through any of the output interfaces below.",
     pipeline: ["Connect", "Ingest", "Normalise", "Store & Index", "Reason", "Deliver"],
     inputsHeading: "Plugged in — input connectors",
     connectors: [
