@@ -28,7 +28,7 @@ export const en = {
       "Synapse",
       "About",
     ],
-    cta: "See the flow",
+    cta: "Getting Started",
     github: "GitHub",
     toggleLabel: "Language",
     menuAria: "Toggle navigation",
@@ -43,7 +43,7 @@ export const en = {
       ". An autonomous Claude Opus agent picks it up, implements it, runs tests and QA, and opens a pull request — your spec becomes shipped code. With ",
     leadLink: "Human Override",
     leadP3: ", a human stays in command of every irreversible step.",
-    ctaPrimary: "See how it works",
+    ctaPrimary: "Getting Started",
     ctaGhost: "Human Override",
     stats: [
       ["2 min", "cron cadence"],

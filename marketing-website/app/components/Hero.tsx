@@ -57,7 +57,7 @@ export function Hero() {
 
           <Reveal delay={240}>
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <a href="#how" className="btn-primary">
+              <a href="/getting-started" className="btn-primary">
                 {h.ctaPrimary}
                 <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none">
                   <path

@@ -64,7 +64,7 @@ export function Nav() {
             {t.nav.github}
           </a>
           <LanguageToggle className="hidden sm:inline-flex" />
-          <a href="#how" className="btn-primary !px-4 !py-2">
+          <a href="/getting-started" className="btn-primary !px-4 !py-2">
             {t.nav.cta}
           </a>
           <button

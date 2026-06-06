@@ -26,7 +26,7 @@ export const de: Content = {
       "Synapse",
       "Über uns",
     ],
-    cta: "Den Ablauf ansehen",
+    cta: "Getting Started",
     github: "GitHub",
     toggleLabel: "Sprache",
     menuAria: "Navigation umschalten",
@@ -41,7 +41,7 @@ export const de: Content = {
       ". Ein autonomer Claude-Opus-Agent übernimmt sie, implementiert sie, führt Tests und QA aus und öffnet einen Pull Request — aus Ihrer Spezifikation wird ausgelieferter Code. Mit ",
     leadLink: "Human Override",
     leadP3: " behält ein Mensch die Kontrolle über jeden unumkehrbaren Schritt.",
-    ctaPrimary: "So funktioniert's",
+    ctaPrimary: "Getting Started",
     ctaGhost: "Human Override",
     stats: [
       ["2 Min.", "Cron-Takt"],
