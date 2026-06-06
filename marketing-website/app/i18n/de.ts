@@ -162,11 +162,15 @@ export const de: Content = {
     titleLead: "Eine agentische Engine. ",
     titleAccent: "Jede Mission.",
     intro:
-      "Dieselbe label-gesteuerte Human-in-the-Loop-Schleife, die Code ausliefert, kann Investment-Recherche, Daten-Pipelines und Back-Office-Workflows betreiben — und dann alles Erzeugte speichern und analysieren.",
+      "Dieselbe label-gesteuerte Human-in-the-Loop-Schleife, die Code ausliefert, kann Investment-Recherche, Daten-Pipelines, Retrieval-Augmented Generation und komplexe LLM-Query-Workflows betreiben — und dann alles Erzeugte speichern und analysieren.",
     items: [
       {
         title: "Agentisches Coding",
         body: "Das Flaggschiff: Eine mit #ready gelabelte Jira-Story wird zu einem getesteten, QA-geprüften, reviewten Pull Request.",
+      },
+      {
+        title: "RAG & komplexe LLM-Queries",
+        body: "Haystack- und LangChain-Pipelines laufen auf isolierten Fargate-Tasks, sodass Agenten Domänenkontext abrufen, Prompts anreichern und über mehrstufige Fragen schlussfolgern können.",
       },
       {
         title: "Investment & Kapitalmärkte",
@@ -190,7 +194,7 @@ export const de: Content = {
     introP1: "Agenten sind nur so gut wie das, was sie erreichen können. ",
     introName: "Synapse",
     introP2:
-      " ist die verbindende Schicht: Binden Sie eine Quelle an, sie wird ingestiert, normalisiert, gespeichert und durchdacht — und dann über jede der Ausgabe-Schnittstellen unten ausgeliefert.",
+      " ist die verbindende Schicht: Binden Sie eine Quelle an, sie wird ingestiert, normalisiert, für Retrieval indiziert und mit Haystack + LangChain auf Fargate durchdacht — und dann über jede der Ausgabe-Schnittstellen unten ausgeliefert.",
     pipeline: ["Anbinden", "Ingestieren", "Normalisieren", "Speichern & Indizieren", "Schlussfolgern", "Ausliefern"],
     inputsHeading: "Angebunden — Eingangs-Konnektoren",
     connectors: [

@@ -14,8 +14,8 @@ export const DEFAULT_LOCALE: Locale = "en";
 
 /** Display labels for the language toggle. */
 export const LOCALE_LABELS: Record<Locale, string> = {
-  en: "EN",
-  de: "DE",
+  en: "English",
+  de: "Deutsch",
 };
 
 export function isLocale(value: unknown): value is Locale {
