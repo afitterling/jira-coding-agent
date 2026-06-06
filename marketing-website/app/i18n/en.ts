@@ -318,61 +318,48 @@ export const en = {
 
   pricing: {
     tag: "Pricing",
-    heading: "Pricing that scales from trial to production.",
+    heading: "Pricing models for every deployment path.",
     intro:
-      "Pick the model that fits your team. Every tier below shows what is in and what is out.",
+      "Choose between pay-per-use and full-usage flat-rate models. Contact us for tailored pricing.",
     plans: [
       {
-        name: "Free trial",
-        price: "Free",
-        cadence: "for 2 weeks",
+        name: "Pay-per-use model",
+        price: "Contact Us",
+        cadence: "usage-based billing",
         description:
-          "Try the complete product for two weeks before you commit.",
+          "Metered pricing where you only pay for the workload you run.",
         included: [
-          "2-week full access",
+          "Pay only for actual usage",
           "All core coding workflow features",
-          "Basic onboarding docs",
+          "Elastic scaling for variable demand",
         ],
-        excluded: ["No SLA", "No dedicated support channel"],
+        excluded: ["No fixed monthly spend cap"],
       },
       {
-        name: "Pay-per-use",
-        price: "Pay-per-use",
-        cadence: "metered billing",
+        name: "On-prem mixed hybrid model",
+        price: "Contact Us",
+        cadence: "full-usage flat rate",
         description:
-          "Only pay for what you run. Best for variable demand.",
+          "Hybrid deployment combining your on-prem environment with managed cloud services.",
         included: [
-          "Usage-based billing",
+          "On-prem + cloud architecture",
           "All core coding workflow features",
-          "No monthly commitment",
+          "Predictable monthly billing",
         ],
-        excluded: ["No monthly cap included", "No enterprise onboarding"],
+        excluded: ["No pure pay-per-use billing"],
       },
       {
-        name: "Limited",
-        price: "€100/month or €200/month",
-        cadence: "limited plan",
+        name: "Cloud-based model",
+        price: "Contact Us",
+        cadence: "full-usage flat rate",
         description:
-          "Capped monthly options with predictable spend for smaller teams.",
+          "Fully managed cloud deployment with fixed monthly commercial terms.",
         included: [
-          "Fixed monthly budget options",
+          "Managed cloud operations",
           "All core coding workflow features",
-          "Priority over trial queue",
+          "Predictable monthly billing",
         ],
-        excluded: ["No enterprise throughput bundle", "No dedicated TAM"],
-      },
-      {
-        name: "Enterprise",
-        price: "€800/month",
-        cadence: "flat monthly",
-        description:
-          "High-throughput execution and enterprise-grade collaboration.",
-        included: [
-          "Highest execution capacity",
-          "All core coding workflow features",
-          "Priority support + onboarding",
-        ],
-        excluded: ["Custom legal/compliance scopes handled separately"],
+        excluded: ["No on-prem residency option"],
       },
     ],
     matrixHeading: "Feature coverage: what's in and what's out",
@@ -381,7 +368,6 @@ export const en = {
     featureColumn: "Feature",
     inLabel: "In",
     outLabel: "Out",
-    columns: ["Free trial", "Pay-per-use", "Limited", "Enterprise"],
   },
 
   screenshots: {

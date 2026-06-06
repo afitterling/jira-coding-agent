@@ -316,63 +316,48 @@ export const de: Content = {
 
   pricing: {
     tag: "Preise",
-    heading: "Preise, die von Testphase bis Produktion mitwachsen.",
+    heading: "Preismodelle für jeden Bereitstellungsweg.",
     intro:
-      "Wählen Sie das Modell, das zu Ihrem Team passt. Jede Stufe zeigt klar, was enthalten ist und was nicht.",
+      "Wählen Sie zwischen Pay-per-use und Full-Usage-Flat-Rate-Modellen. Kontaktieren Sie uns für individuelle Preise.",
     plans: [
       {
-        name: "Kostenlose Testphase",
-        price: "Kostenlos",
-        cadence: "für 2 Wochen",
-        description:
-          "Testen Sie das vollständige Produkt zwei Wochen lang, bevor Sie sich festlegen.",
-        included: [
-          "2 Wochen Vollzugriff",
-          "Alle Kernfunktionen des Coding-Workflows",
-          "Grundlegende Onboarding-Dokumentation",
-        ],
-        excluded: ["Kein SLA", "Kein dedizierter Support-Kanal"],
-      },
-      {
-        name: "Pay-per-use",
-        price: "Pay-per-use",
+        name: "Pay-per-use-Modell",
+        price: "Kontaktieren Sie uns",
         cadence: "verbrauchsbasierte Abrechnung",
         description:
-          "Sie zahlen nur, was Sie wirklich ausführen. Ideal bei schwankender Last.",
+          "Verbrauchsabhängiges Modell, bei dem Sie nur für tatsächlich ausgeführte Last zahlen.",
         included: [
-          "Nutzungsbasierte Abrechnung",
+          "Abrechnung nach tatsächlicher Nutzung",
           "Alle Kernfunktionen des Coding-Workflows",
-          "Keine monatliche Bindung",
+          "Elastische Skalierung bei schwankender Last",
         ],
-        excluded: ["Kein monatliches Cap enthalten", "Kein Enterprise-Onboarding"],
+        excluded: ["Kein fixer monatlicher Ausgabenrahmen"],
       },
       {
-        name: "Limited",
-        price: "100 €/Monat oder 200 €/Monat",
-        cadence: "limitiertes Paket",
+        name: "On-Prem Mixed Hybrid Modell",
+        price: "Kontaktieren Sie uns",
+        cadence: "Full-Usage-Flat-Rate",
         description:
-          "Monatlich gedeckelte Pakete mit planbaren Kosten für kleinere Teams.",
+          "Hybrides Bereitstellungsmodell aus Ihrer On-Prem-Umgebung und gemanagten Cloud-Services.",
         included: [
-          "Fixe monatliche Budgetoptionen",
+          "On-Prem + Cloud-Architektur",
           "Alle Kernfunktionen des Coding-Workflows",
-          "Priorität vor der Trial-Warteschlange",
+          "Planbare monatliche Abrechnung",
         ],
-        excluded: ["Kein Enterprise-Throughput-Bundle", "Kein dedizierter TAM"],
+        excluded: ["Kein reines Pay-per-use-Billing"],
       },
       {
-        name: "Enterprise",
-        price: "800 €/Monat",
-        cadence: "fester Monatspreis",
+        name: "Cloud-basiertes Modell",
+        price: "Kontaktieren Sie uns",
+        cadence: "Full-Usage-Flat-Rate",
         description:
-          "Hoher Durchsatz und Zusammenarbeit auf Enterprise-Niveau.",
+          "Vollständig gemanagte Cloud-Bereitstellung mit festen monatlichen Konditionen.",
         included: [
-          "Höchste Ausführungskapazität",
+          "Gemanagte Cloud-Operations",
           "Alle Kernfunktionen des Coding-Workflows",
-          "Priorisierter Support + Onboarding",
+          "Planbare monatliche Abrechnung",
         ],
-        excluded: [
-          "Individuelle Legal-/Compliance-Umfänge werden separat bewertet",
-        ],
+        excluded: ["Keine On-Prem-Residency-Option"],
       },
     ],
     matrixHeading: "Feature-Abdeckung: was drin ist und was nicht",
@@ -381,7 +366,6 @@ export const de: Content = {
     featureColumn: "Feature",
     inLabel: "Drin",
     outLabel: "Raus",
-    columns: ["Testphase", "Pay-per-use", "Limited", "Enterprise"],
   },
 
   screenshots: {

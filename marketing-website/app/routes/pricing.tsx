@@ -4,7 +4,7 @@ import { SectionTag } from "~/components/HowItWorks";
 import { Reveal } from "~/components/Reveal";
 import { useT } from "~/i18n/context";
 
-const PLAN_KEYS = ["trial", "payPerUse", "limited", "enterprise"] as const;
+const PLAN_KEYS = ["payPerUse", "hybrid", "cloud"] as const;
 type PlanKey = (typeof PLAN_KEYS)[number];
 
 /**
@@ -13,17 +13,17 @@ type PlanKey = (typeof PLAN_KEYS)[number];
  */
 const FEATURE_PLAN_MATRIX: Record<PlanKey, boolean>[] = [
   // Agentic AI, end to end
-  { trial: true, payPerUse: true, limited: true, enterprise: true },
+  { payPerUse: true, hybrid: true, cloud: true },
   // Jira workflow integration
-  { trial: true, payPerUse: true, limited: true, enterprise: true },
+  { payPerUse: true, hybrid: true, cloud: true },
   // Testing + QA sub-flows
-  { trial: true, payPerUse: true, limited: true, enterprise: true },
+  { payPerUse: true, hybrid: true, cloud: true },
   // Tenant isolation
-  { trial: false, payPerUse: true, limited: true, enterprise: true },
+  { payPerUse: true, hybrid: true, cloud: true },
   // Live run dashboard
-  { trial: false, payPerUse: true, limited: true, enterprise: true },
+  { payPerUse: true, hybrid: true, cloud: true },
   // PR-gated, traceable
-  { trial: true, payPerUse: true, limited: true, enterprise: true },
+  { payPerUse: true, hybrid: true, cloud: true },
 ];
 
 export default function PricingPage() {
@@ -32,10 +32,10 @@ export default function PricingPage() {
   const websiteFeatures = t.features.items;
   if (
     websiteFeatures.length !== FEATURE_PLAN_MATRIX.length ||
-    pc.columns.length !== PLAN_KEYS.length
+    pc.plans.length !== PLAN_KEYS.length
   ) {
     throw new Error(
-      `Pricing feature matrix mismatch: features=${websiteFeatures.length}, matrix=${FEATURE_PLAN_MATRIX.length}, columns=${pc.columns.length}, expectedColumns=${PLAN_KEYS.length}.`,
+      `Pricing feature matrix mismatch: features=${websiteFeatures.length}, matrix=${FEATURE_PLAN_MATRIX.length}, plans=${pc.plans.length}, expectedPlans=${PLAN_KEYS.length}.`,
     );
   }
 
@@ -53,7 +53,7 @@ export default function PricingPage() {
               <p className="mt-4 text-lg text-slate-400">{pc.intro}</p>
             </Reveal>
 
-            <div className="mt-12 grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
+            <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {pc.plans.map((plan, i) => (
                 <Reveal key={plan.name} delay={i * 80}>
                   <article className="card h-full p-6">
@@ -115,12 +115,12 @@ export default function PricingPage() {
                     <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
                       {pc.featureColumn}
                     </th>
-                    {pc.columns.map((column) => (
+                    {pc.plans.map((plan) => (
                       <th
-                        key={column}
+                        key={plan.name}
                         className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-400"
                       >
-                        {column}
+                        {plan.name}
                       </th>
                     ))}
                   </tr>
@@ -134,11 +134,11 @@ export default function PricingPage() {
                           {feature.body}
                         </p>
                       </td>
-                      {pc.columns.map((column, columnIndex) => {
-                        const planKey = PLAN_KEYS[columnIndex];
+                      {pc.plans.map((plan, planIndex) => {
+                        const planKey = PLAN_KEYS[planIndex];
                         const included = FEATURE_PLAN_MATRIX[featureIndex][planKey];
                         return (
-                          <td key={`${feature.title}-${column}`} className="px-4 py-4 align-top">
+                          <td key={`${feature.title}-${plan.name}`} className="px-4 py-4 align-top">
                             <span
                               className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
                                 included
