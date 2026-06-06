@@ -4,6 +4,10 @@ import { SectionTag } from "~/components/HowItWorks";
 import { Reveal } from "~/components/Reveal";
 import { useT } from "~/i18n/context";
 
+/**
+ * Rows map to `t.features.items` in order.
+ * Columns map to pricing plans in order: Free trial, Pay-per-use, Limited, Enterprise.
+ */
 const PLAN_FEATURE_MATRIX = [
   [true, true, true, true],
   [true, true, true, true],
@@ -114,7 +118,7 @@ export default function PricingPage() {
                         </p>
                       </td>
                       {pc.columns.map((column, columnIndex) => {
-                        const included = PLAN_FEATURE_MATRIX[featureIndex][columnIndex];
+                        const included = PLAN_FEATURE_MATRIX[featureIndex]?.[columnIndex] ?? false;
                         return (
                           <td key={`${feature.title}-${column}`} className="px-4 py-4 align-top">
                             <span
@@ -149,7 +153,7 @@ export default function PricingPage() {
 
 function CheckMark({ className = "" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 20 20" className={className} fill="none" aria-hidden>
+    <svg viewBox="0 0 20 20" className={className} fill="none" aria-hidden="true">
       <path
         d="m4 10 4 4 8-8"
         stroke="currentColor"
@@ -163,7 +167,7 @@ function CheckMark({ className = "" }: { className?: string }) {
 
 function CrossMark({ className = "" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 20 20" className={className} fill="none" aria-hidden>
+    <svg viewBox="0 0 20 20" className={className} fill="none" aria-hidden="true">
       <path
         d="m5 5 10 10M15 5 5 15"
         stroke="currentColor"
