@@ -9,10 +9,10 @@ import type { Content } from "~/i18n/index";
 
 export const de: Content = {
   meta: {
-    title: "Agentic Coding mit Jira — sp33c",
+    title: "Agentic",
     description:
       "sp33c baut agentisches Coding mit Jira: Versehen Sie eine Story mit #ready, und ein autonomer Claude-Opus-Agent implementiert sie, führt Tests + QA aus und öffnet einen PR. Human Override behält die Kontrolle.",
-    ogTitle: "Agentic Coding mit Jira — sp33c",
+    ogTitle: "Agentic — agentisches Coding, gesteuert von Jira",
     ogDescription:
       "Agentisches Coding mit Jira von sp33c — implementieren, testen, QA, PR. Autonomie, die Sie per Veto stoppen.",
   },

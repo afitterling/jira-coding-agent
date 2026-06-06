@@ -1,8 +1,26 @@
+import type { MetaFunction } from "@remix-run/node";
+
 import { Footer } from "~/components/Footer";
 import { Nav } from "~/components/Nav";
 import { SectionTag } from "~/components/HowItWorks";
-import { Reveal } from "~/components/Reveal";
+import { DEFAULT_LOCALE, type Locale } from "~/i18n/config";
 import { useT } from "~/i18n/context";
+import { dictionaries } from "~/i18n/index";
+import { Reveal } from "~/components/Reveal";
+import { pageMeta } from "~/seo";
+
+export const meta: MetaFunction = ({ matches }) => {
+  const root = matches.find((m) => m.id === "root");
+  const locale =
+    (root?.data as { locale?: Locale } | undefined)?.locale ?? DEFAULT_LOCALE;
+  const pc = dictionaries[locale].pricing;
+  return pageMeta({
+    title: pc.tag,
+    description: pc.intro,
+    path: "/pricing",
+    locale,
+  });
+};
 
 const PLAN_KEYS = ["payPerUse", "hybrid", "cloud"] as const;
 type PlanKey = (typeof PLAN_KEYS)[number];

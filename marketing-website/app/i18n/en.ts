@@ -11,10 +11,10 @@
  */
 export const en = {
   meta: {
-    title: "Agentic Coding with Jira — sp33c",
+    title: "Agentic",
     description:
       "sp33c builds agentic coding with Jira: label a story #ready and an autonomous Claude Opus agent implements it, runs tests + QA, and opens a PR. Human Override keeps you in command.",
-    ogTitle: "Agentic Coding with Jira — sp33c",
+    ogTitle: "Agentic — agentic coding, driven by Jira",
     ogDescription:
       "Agentic coding with Jira by sp33c — implement, test, QA, PR. Autonomy you can veto.",
   },

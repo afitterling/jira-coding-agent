@@ -18,6 +18,7 @@ import { I18nProvider } from "~/i18n/context";
 import { DEFAULT_LOCALE } from "~/i18n/config";
 import { dictionaries } from "~/i18n/index";
 import { getLocale } from "~/i18n.server";
+import { pageMeta } from "~/seo";
 import tailwind from "~/tailwind.css?url";
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -41,15 +42,14 @@ export const links: LinksFunction = () => [
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   const locale = data?.locale ?? DEFAULT_LOCALE;
   const m = dictionaries[locale].meta;
-  return [
-    { title: m.title },
-    { name: "description", content: m.description },
-    { name: "author", content: "Alex Fitterling — sp33c" },
-    { name: "theme-color", content: "#030307" },
-    { property: "og:title", content: m.ogTitle },
-    { property: "og:description", content: m.ogDescription },
-    { property: "og:type", content: "website" },
-  ];
+  return pageMeta({
+    title: m.title,
+    description: m.description,
+    path: "/",
+    locale,
+    ogTitle: m.ogTitle,
+    ogDescription: m.ogDescription,
+  });
 };
 
 export function Layout({ children }: { children: React.ReactNode }) {
