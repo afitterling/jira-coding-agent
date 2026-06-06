@@ -46,6 +46,7 @@ export const en = {
     leadP3: ", a human stays in command of every irreversible step.",
     ctaPrimary: "See how it works",
     ctaGhost: "Human Override",
+    ctaPricing: "Pricing",
     stats: [
       ["2 min", "cron cadence"],
       ["1 microVM", "per story, isolated"],
@@ -458,6 +459,7 @@ export const en = {
       repo: "GitHub repository",
       docs: "Documentation",
       diagram: "System flow diagram",
+      pricing: "Pricing",
       site: "sp33c.tech",
     },
     contactHeading: "Contact",

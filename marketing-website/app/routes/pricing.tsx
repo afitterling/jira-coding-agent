@@ -4,23 +4,40 @@ import { SectionTag } from "~/components/HowItWorks";
 import { Reveal } from "~/components/Reveal";
 import { useT } from "~/i18n/context";
 
+const PLAN_KEYS = ["trial", "payPerUse", "limited", "enterprise"] as const;
+type PlanKey = (typeof PLAN_KEYS)[number];
+
 /**
- * Rows map to `t.features.items` in order.
- * Columns map to pricing plans in order: Free trial, Pay-per-use, Limited, Enterprise.
+ * Entries map to `t.features.items` in order.
+ * Each key maps to plan availability for one feature.
  */
-const PLAN_FEATURE_MATRIX = [
-  [true, true, true, true],
-  [true, true, true, true],
-  [true, true, true, true],
-  [false, true, true, true],
-  [false, true, true, true],
-  [true, true, true, true],
+const FEATURE_PLAN_MATRIX: Record<PlanKey, boolean>[] = [
+  // Agentic AI, end to end
+  { trial: true, payPerUse: true, limited: true, enterprise: true },
+  // Jira workflow integration
+  { trial: true, payPerUse: true, limited: true, enterprise: true },
+  // Testing + QA sub-flows
+  { trial: true, payPerUse: true, limited: true, enterprise: true },
+  // Tenant isolation
+  { trial: false, payPerUse: true, limited: true, enterprise: true },
+  // Live run dashboard
+  { trial: false, payPerUse: true, limited: true, enterprise: true },
+  // PR-gated, traceable
+  { trial: true, payPerUse: true, limited: true, enterprise: true },
 ];
 
 export default function PricingPage() {
   const { t } = useT();
   const pc = t.pricing;
   const websiteFeatures = t.features.items;
+  if (
+    websiteFeatures.length !== FEATURE_PLAN_MATRIX.length ||
+    pc.columns.length !== PLAN_KEYS.length
+  ) {
+    throw new Error(
+      `Pricing feature matrix mismatch: features=${websiteFeatures.length}, matrix=${FEATURE_PLAN_MATRIX.length}, columns=${pc.columns.length}, expectedColumns=${PLAN_KEYS.length}.`,
+    );
+  }
 
   return (
     <>
@@ -48,9 +65,9 @@ export default function PricingPage() {
                     </p>
 
                     <div className="mt-6">
-                      <h2 className="text-xs font-semibold uppercase tracking-wide text-accent-lime">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-accent-lime">
                         {pc.inLabel}
-                      </h2>
+                      </p>
                       <ul className="mt-2 space-y-2 text-sm text-slate-300">
                         {plan.included.map((item) => (
                           <li key={item} className="flex items-start gap-2">
@@ -62,9 +79,9 @@ export default function PricingPage() {
                     </div>
 
                     <div className="mt-5">
-                      <h2 className="text-xs font-semibold uppercase tracking-wide text-rose-300">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-rose-300">
                         {pc.outLabel}
-                      </h2>
+                      </p>
                       <ul className="mt-2 space-y-2 text-sm text-slate-400">
                         {plan.excluded.map((item) => (
                           <li key={item} className="flex items-start gap-2">
@@ -118,7 +135,8 @@ export default function PricingPage() {
                         </p>
                       </td>
                       {pc.columns.map((column, columnIndex) => {
-                        const included = PLAN_FEATURE_MATRIX[featureIndex]?.[columnIndex] ?? false;
+                        const planKey = PLAN_KEYS[columnIndex];
+                        const included = FEATURE_PLAN_MATRIX[featureIndex][planKey];
                         return (
                           <td key={`${feature.title}-${column}`} className="px-4 py-4 align-top">
                             <span

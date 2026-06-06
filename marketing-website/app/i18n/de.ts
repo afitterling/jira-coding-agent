@@ -44,6 +44,7 @@ export const de: Content = {
     leadP3: " behält ein Mensch die Kontrolle über jeden unumkehrbaren Schritt.",
     ctaPrimary: "So funktioniert's",
     ctaGhost: "Human Override",
+    ctaPricing: "Preise",
     stats: [
       ["2 Min.", "Cron-Takt"],
       ["1 microVM", "pro Story, isoliert"],
@@ -458,6 +459,7 @@ export const de: Content = {
       repo: "GitHub-Repository",
       docs: "Dokumentation",
       diagram: "System-Ablaufdiagramm",
+      pricing: "Preise",
       site: "sp33c.tech",
     },
     contactHeading: "Kontakt",

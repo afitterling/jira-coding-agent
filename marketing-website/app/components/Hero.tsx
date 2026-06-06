@@ -72,6 +72,9 @@ export function Hero() {
               <a href="#loop" className="btn-ghost">
                 {h.ctaGhost}
               </a>
+              <a href="/pricing" className="btn-ghost">
+                {h.ctaPricing}
+              </a>
             </div>
           </Reveal>
 
