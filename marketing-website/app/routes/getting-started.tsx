@@ -12,6 +12,16 @@ import {
 } from "~/lib/auth.server";
 
 const DASHBOARD_URL = process.env.DASHBOARD_URL ?? "/";
+type ActionState = {
+  mode?: "login" | "signup";
+  email?: string;
+  error?: string;
+  ok?: string;
+  needsConfirm?: boolean;
+  needsReset?: boolean;
+  onboardingError?: string;
+  onboardingOk?: string;
+};
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await getUser(request);
@@ -106,7 +116,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function GettingStarted() {
   const { user, dashboardUrl, mode, email } = useLoaderData<typeof loader>();
-  const data = useActionData<typeof action>();
+  const data = useActionData<typeof action>() as ActionState | undefined;
   const nav = useNavigation();
   const busy = nav.state !== "idle";
 
@@ -119,7 +129,7 @@ export default function GettingStarted() {
             Welcome, <span className="text-gradient">{user.email}</span>
           </h1>
           <p className="mt-4 max-w-2xl text-slate-300">
-            Let&apos;s start your build pipeline: define the project and technology now, then add plugins and connect GitHub repos.
+            Let's start your build pipeline: define the project and technology now, then add plugins and connect GitHub repos.
           </p>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
