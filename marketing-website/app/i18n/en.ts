@@ -363,7 +363,7 @@ export const en = {
       },
       {
         name: "Enterprise",
-        price: "€5,000/month",
+        price: "€800/month",
         cadence: "flat monthly",
         description:
           "High-throughput execution and enterprise-grade collaboration.",

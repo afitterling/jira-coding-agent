@@ -361,7 +361,7 @@ export const de: Content = {
       },
       {
         name: "Enterprise",
-        price: "5.000 €/Monat",
+        price: "800 €/Monat",
         cadence: "fester Monatspreis",
         description:
           "Hoher Durchsatz und Zusammenarbeit auf Enterprise-Niveau.",
