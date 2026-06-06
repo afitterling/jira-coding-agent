@@ -29,6 +29,7 @@ export const en = {
       "FAQ",
       "About",
     ],
+    pricing: "Pricing",
     cta: "See the flow",
     github: "GitHub",
     toggleLabel: "Language",
@@ -46,6 +47,7 @@ export const en = {
     leadP3: ", a human stays in command of every irreversible step.",
     ctaPrimary: "See how it works",
     ctaGhost: "Human Override",
+    ctaPricing: "Pricing",
     stats: [
       ["2 min", "cron cadence"],
       ["1 microVM", "per story, isolated"],
@@ -352,6 +354,60 @@ export const en = {
     ],
   },
 
+  pricing: {
+    tag: "Pricing",
+    heading: "Pricing models for every deployment path.",
+    intro:
+      "Choose between pay-per-use and full-usage flat-rate models. Contact us for tailored pricing.",
+    plans: [
+      {
+        name: "Pay-per-use model",
+        price: "Contact Us",
+        cadence: "usage-based billing",
+        description:
+          "Metered pricing where you only pay for the workload you run.",
+        included: [
+          "Pay only for actual usage",
+          "All core coding workflow features",
+          "Elastic scaling for variable demand",
+        ],
+        excluded: ["No fixed monthly spend cap"],
+      },
+      {
+        name: "On-prem mixed hybrid model",
+        price: "Contact Us",
+        cadence: "full-usage flat rate",
+        description:
+          "Hybrid deployment combining your on-prem environment with managed cloud services.",
+        included: [
+          "On-prem + cloud architecture",
+          "All core coding workflow features",
+          "Predictable monthly billing",
+        ],
+        excluded: ["No pure pay-per-use billing"],
+      },
+      {
+        name: "Cloud-based model",
+        price: "Contact Us",
+        cadence: "full-usage flat rate",
+        description:
+          "Fully managed cloud deployment with fixed monthly commercial terms.",
+        included: [
+          "Managed cloud operations",
+          "All core coding workflow features",
+          "Predictable monthly billing",
+        ],
+        excluded: ["No on-prem residency option"],
+      },
+    ],
+    matrixHeading: "Feature coverage: what's in and what's out",
+    matrixIntro:
+      "All features currently presented on this website are listed below. A check means the feature is in; a cross means it is out.",
+    featureColumn: "Feature",
+    inLabel: "In",
+    outLabel: "Out",
+  },
+
   screenshots: {
     tag: "See it in motion",
     heading: "From the board to the dashboard.",
@@ -448,6 +504,7 @@ export const en = {
       repo: "GitHub repository",
       docs: "Documentation",
       diagram: "System flow diagram",
+      pricing: "Pricing",
       site: "sp33c.tech",
     },
     contactHeading: "Contact",

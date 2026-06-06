@@ -75,6 +75,11 @@ export function Footer() {
                 </a>
               </li>
               <li>
+                <a className="transition-colors hover:text-white" href="/pricing">
+                  {f.projectLinks.pricing}
+                </a>
+              </li>
+              <li>
                 <a className="transition-colors hover:text-white" href="https://sp33c.tech" target="_blank" rel="noreferrer">
                   {f.projectLinks.site}
                 </a>

@@ -55,6 +55,12 @@ export function Nav() {
 
         <div className="flex items-center gap-2">
           <a
+            href="/pricing"
+            className="hidden text-sm text-slate-400 transition-colors hover:text-white sm:inline-flex"
+          >
+            {t.nav.pricing}
+          </a>
+          <a
             href={REPO_URL}
             target="_blank"
             rel="noreferrer"
@@ -98,6 +104,13 @@ export function Nav() {
             </a>
           ))}
           <div className="mt-2 border-t border-white/10 pt-3">
+            <a
+              href="/pricing"
+              onClick={() => setOpen(false)}
+              className="mb-2 block rounded-lg px-3 py-2.5 text-sm text-slate-300 hover:bg-white/5"
+            >
+              {t.nav.pricing}
+            </a>
             <LanguageToggle />
           </div>
         </div>

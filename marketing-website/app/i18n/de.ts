@@ -27,6 +27,7 @@ export const de: Content = {
       "FAQ",
       "Über uns",
     ],
+    pricing: "Preise",
     cta: "Den Ablauf ansehen",
     github: "GitHub",
     toggleLabel: "Sprache",
@@ -44,6 +45,7 @@ export const de: Content = {
     leadP3: " behält ein Mensch die Kontrolle über jeden unumkehrbaren Schritt.",
     ctaPrimary: "So funktioniert's",
     ctaGhost: "Human Override",
+    ctaPricing: "Preise",
     stats: [
       ["2 Min.", "Cron-Takt"],
       ["1 microVM", "pro Story, isoliert"],
@@ -350,6 +352,60 @@ export const de: Content = {
     ],
   },
 
+  pricing: {
+    tag: "Preise",
+    heading: "Preismodelle für jeden Bereitstellungsweg.",
+    intro:
+      "Wählen Sie zwischen Pay-per-use und Full-Usage-Flat-Rate-Modellen. Kontaktieren Sie uns für individuelle Preise.",
+    plans: [
+      {
+        name: "Pay-per-use-Modell",
+        price: "Kontaktieren Sie uns",
+        cadence: "verbrauchsbasierte Abrechnung",
+        description:
+          "Verbrauchsabhängiges Modell, bei dem Sie nur für tatsächlich ausgeführte Last zahlen.",
+        included: [
+          "Abrechnung nach tatsächlicher Nutzung",
+          "Alle Kernfunktionen des Coding-Workflows",
+          "Elastische Skalierung bei schwankender Last",
+        ],
+        excluded: ["Kein fixer monatlicher Ausgabenrahmen"],
+      },
+      {
+        name: "On-Prem Mixed Hybrid Modell",
+        price: "Kontaktieren Sie uns",
+        cadence: "Full-Usage-Flat-Rate",
+        description:
+          "Hybrides Bereitstellungsmodell aus Ihrer On-Prem-Umgebung und gemanagten Cloud-Services.",
+        included: [
+          "On-Prem + Cloud-Architektur",
+          "Alle Kernfunktionen des Coding-Workflows",
+          "Planbare monatliche Abrechnung",
+        ],
+        excluded: ["Kein reines Pay-per-use-Billing"],
+      },
+      {
+        name: "Cloud-basiertes Modell",
+        price: "Kontaktieren Sie uns",
+        cadence: "Full-Usage-Flat-Rate",
+        description:
+          "Vollständig gemanagte Cloud-Bereitstellung mit festen monatlichen Konditionen.",
+        included: [
+          "Gemanagte Cloud-Operations",
+          "Alle Kernfunktionen des Coding-Workflows",
+          "Planbare monatliche Abrechnung",
+        ],
+        excluded: ["Keine On-Prem-Residency-Option"],
+      },
+    ],
+    matrixHeading: "Feature-Abdeckung: was drin ist und was nicht",
+    matrixIntro:
+      "Alle aktuell auf dieser Website gezeigten Features sind unten aufgelistet. Ein Häkchen bedeutet enthalten; ein Kreuz bedeutet nicht enthalten.",
+    featureColumn: "Feature",
+    inLabel: "Drin",
+    outLabel: "Raus",
+  },
+
   screenshots: {
     tag: "In Bewegung sehen",
     heading: "Vom Board zum Dashboard.",
@@ -446,6 +502,7 @@ export const de: Content = {
       repo: "GitHub-Repository",
       docs: "Dokumentation",
       diagram: "System-Ablaufdiagramm",
+      pricing: "Preise",
       site: "sp33c.tech",
     },
     contactHeading: "Kontakt",
