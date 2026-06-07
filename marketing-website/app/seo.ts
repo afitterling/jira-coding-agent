@@ -7,6 +7,14 @@ export const SITE_URL = "https://agentic.sp33c.tech";
 /** Brand suffix; every page title renders as `<Page> | sp33c`. */
 export const BRAND = "sp33c";
 
+/** Maps each supported locale to its Open Graph `og:locale` tag. */
+const OG_LOCALES: Record<Locale, string> = {
+  en: "en_US",
+  de: "de_DE",
+  zh: "zh_CN",
+  ms: "ms_MY",
+};
+
 export interface PageSeo {
   /** Page name shown before ` | sp33c` (e.g. "Agentic", "Pricing"). */
   title: string;
@@ -47,7 +55,7 @@ export function pageMeta({
     { property: "og:type", content: "website" },
     { property: "og:url", content: url },
     { property: "og:site_name", content: BRAND },
-    { property: "og:locale", content: locale === "de" ? "de_DE" : "en_US" },
+    { property: "og:locale", content: OG_LOCALES[locale] ?? "en_US" },
     { name: "twitter:card", content: "summary_large_image" },
     { name: "twitter:title", content: shareTitle },
     { name: "twitter:description", content: shareDescription },

@@ -6,16 +6,18 @@
  * toggle) without dragging server-only Remix APIs into the client.
  */
 
-export const SUPPORTED_LOCALES = ["en", "de"] as const;
+export const SUPPORTED_LOCALES = ["en", "de", "zh", "ms"] as const;
 
 export type Locale = (typeof SUPPORTED_LOCALES)[number];
 
 export const DEFAULT_LOCALE: Locale = "en";
 
-/** Display labels for the language toggle. */
+/** Display labels for the language toggle (each shown in its own language). */
 export const LOCALE_LABELS: Record<Locale, string> = {
   en: "English",
   de: "Deutsch",
+  zh: "中文",
+  ms: "Bahasa Melayu",
 };
 
 export function isLocale(value: unknown): value is Locale {
