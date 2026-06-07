@@ -20,11 +20,62 @@ export async function loader({ request }: LoaderFunctionArgs) {
 // NOTE: This page is a design preview — selections are not yet persisted or wired
 // to the agent. It exists to shape the configuration experience (see AS-49).
 
-const ARCHITECTURES = [
-  { id: "inline", name: "Inline", tag: "single Lambda", desc: "The cron implements stories in-process. Cheapest and fastest to start — no isolation, no PRs." },
-  { id: "fargate", name: "Isolated runner", tag: "Fargate · per story", desc: "Each story runs Claude Code in its own microVM: clones the repo, runs tests, opens a PR." },
-  { id: "multi", name: "Multi-agent pipeline", tag: "specialised agents", desc: "Distinct agents hand off across the pipeline for higher quality on complex work." },
-] as const;
+// Architecture is a set of independent choices. `current` marks today's setup.
+interface ArchOption {
+  id: string;
+  name: string;
+  desc: string;
+}
+interface ArchGroup {
+  key: "execution" | "agents" | "tenancy" | "platform";
+  label: string;
+  current: string;
+  options: ArchOption[];
+}
+
+const ARCH_GROUPS: ArchGroup[] = [
+  {
+    key: "execution",
+    label: "Execution",
+    current: "inline",
+    options: [
+      { id: "inline", name: "Inline", desc: "Implement in-process and post to Jira. Cheapest, no PRs." },
+      { id: "runner", name: "Isolated runner", desc: "Fargate per story — clones the repo, runs tests, opens a PR." },
+    ],
+  },
+  {
+    key: "agents",
+    label: "Agents",
+    current: "multi",
+    options: [
+      { id: "multi", name: "Multi-agent", desc: "Specialised agents hand off across stages." },
+      { id: "single", name: "Single agent", desc: "One agent handles the whole story." },
+    ],
+  },
+  {
+    key: "tenancy",
+    label: "Tenancy",
+    current: "multi",
+    options: [
+      { id: "multi", name: "Multi-tenancy", desc: "One deployment serves many isolated tenants." },
+      { id: "single", name: "Single-tenant", desc: "A dedicated deployment per customer." },
+    ],
+  },
+  {
+    key: "platform",
+    label: "Platform",
+    current: "aws-sst",
+    options: [
+      { id: "aws-sst", name: "AWS SST", desc: "Serverless AWS, defined with SST." },
+      { id: "vercel", name: "Vercel", desc: "Dashboard and functions on Vercel." },
+      { id: "azure", name: "Azure", desc: "Azure Container Apps + Functions." },
+      { id: "custom", name: "Custom", desc: "Bring your own infrastructure." },
+    ],
+  },
+];
+
+type ArchSelection = Record<ArchGroup["key"], string>;
+const ARCH_DEFAULT: ArchSelection = { execution: "inline", agents: "multi", tenancy: "multi", platform: "aws-sst" };
 
 interface AgentDef {
   id: string;
@@ -45,6 +96,17 @@ const AGENTS: AgentDef[] = [
   { id: "risk", name: "Risk Assessment", desc: "Flags delivery, security, and compliance risk in a story." },
   { id: "financial-advisor", name: "Financial Advisor", desc: "Weighs cost/benefit and ROI of the proposed work." },
   { id: "cfo-assistant", name: "CFO assistant", desc: "Tracks budget impact and spend against the plan." },
+];
+
+// AI engine per agent. Only Claude is available today; others are placeholders.
+const ENGINES = [
+  { id: "claude", name: "Claude", available: true },
+  { id: "gpt", name: "OpenAI GPT", available: false },
+  { id: "gemini", name: "Google Gemini", available: false },
+];
+const CLAUDE_MODELS = [
+  { id: "sonnet", name: "Sonnet", note: "fast · lower cost" },
+  { id: "opus", name: "Opus", note: "most capable" },
 ];
 
 // The Jira-label handoff: each agent picks up issues with the incoming label and
@@ -72,7 +134,8 @@ const PIPELINE_FLOW: PipelineAgent[] = [
 
 export default function Configure() {
   const { email, projects, selected, locked } = useLoaderData<typeof loader>();
-  const [arch, setArch] = useState<string>("fargate");
+  const [arch, setArch] = useState<ArchSelection>(ARCH_DEFAULT);
+  const pickArch = (group: ArchGroup["key"], id: string) => setArch((a) => ({ ...a, [group]: id }));
   const [project, setProject] = useState<string>(selected);
   const [agents, setAgents] = useState<Record<string, boolean>>(
     Object.fromEntries(AGENTS.map((a) => [a.id, Boolean(a.on)])),
@@ -80,6 +143,14 @@ export default function Configure() {
 
   const toggle = (id: string) => setAgents((a) => ({ ...a, [id]: !a[id] }));
   const lockedName = projects.find((p) => p.projectId === selected)?.name;
+
+  // Click an agent to configure its AI engine + model.
+  const [configuring, setConfiguring] = useState<string | null>(null);
+  const [agentCfg, setAgentCfg] = useState<Record<string, { engine: string; model: string }>>(
+    Object.fromEntries(AGENTS.map((a) => [a.id, { engine: "claude", model: "sonnet" }])),
+  );
+  const setCfg = (id: string, patch: Partial<{ engine: string; model: string }>) =>
+    setAgentCfg((c) => ({ ...c, [id]: { ...c[id], ...patch } }));
 
   return (
     <>
@@ -133,55 +204,143 @@ export default function Configure() {
           )}
         </div>
 
-        {/* Architecture */}
+        {/* Architecture — independent choices; the current setup is badged. */}
         <section className="mt-10">
           <Eyebrow>Architecture</Eyebrow>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {ARCHITECTURES.map((a) => {
-              const active = arch === a.id;
-              return (
-                <button
-                  key={a.id}
-                  type="button"
-                  onClick={() => setArch(a.id)}
-                  className={`card p-5 text-left transition-all ${active ? "!border-accent/60 ring-1 ring-accent/30" : "card-hover"}`}
-                >
-                  <div className="flex items-center justify-between">
-                    <strong className="text-white">{a.name}</strong>
-                    <span className={`h-3 w-3 rounded-full border ${active ? "border-accent bg-accent" : "border-white/20"}`} />
-                  </div>
-                  <div className="mt-0.5 font-mono text-[11px] text-accent">{a.tag}</div>
-                  <p className="mt-2 text-xs leading-relaxed text-slate-400">{a.desc}</p>
-                </button>
-              );
-            })}
+          <div className="grid gap-6">
+            {ARCH_GROUPS.map((group) => (
+              <div key={group.key}>
+                <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  {group.label}
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  {group.options.map((opt) => {
+                    const active = arch[group.key] === opt.id;
+                    const current = group.current === opt.id;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => pickArch(group.key, opt.id)}
+                        className={`card p-4 text-left transition-all ${active ? "!border-accent/60 ring-1 ring-accent/30" : "card-hover"}`}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <strong className="text-sm text-white">{opt.name}</strong>
+                          {current && (
+                            <span className="rounded-full bg-accent-lime/20 px-2 py-0.5 font-mono text-[10px] text-accent-lime">
+                              current
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-1.5 text-xs leading-relaxed text-slate-400">{opt.desc}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 
-        {/* Agents */}
+        {/* Agents — toggle to enable; click the body to configure engine/model. */}
         <section className="mt-10">
           <Eyebrow>Agents</Eyebrow>
           <div className="grid gap-3 sm:grid-cols-2">
             {AGENTS.map((ag) => {
               const on = agents[ag.id];
+              const cfg = agentCfg[ag.id];
+              const isCfg = configuring === ag.id;
               return (
-                <button
+                <div
                   key={ag.id}
-                  type="button"
-                  onClick={() => toggle(ag.id)}
-                  className={`card flex items-center gap-4 p-4 text-left transition-all ${on ? "" : "opacity-50"} card-hover`}
+                  className={`card flex items-center gap-4 p-4 transition-all ${on ? "" : "opacity-50"} ${isCfg ? "!border-accent/60 ring-1 ring-accent/30" : "card-hover"}`}
                 >
-                  <span className={`relative h-6 w-10 shrink-0 rounded-full transition-colors ${on ? "bg-accent" : "bg-white/10"}`}>
+                  <button
+                    type="button"
+                    onClick={() => toggle(ag.id)}
+                    aria-label={`${on ? "Disable" : "Enable"} ${ag.name}`}
+                    className={`relative h-6 w-10 shrink-0 rounded-full transition-colors ${on ? "bg-accent" : "bg-white/10"}`}
+                  >
                     <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${on ? "left-[18px]" : "left-0.5"}`} />
-                  </span>
-                  <span className="min-w-0">
+                  </button>
+                  <button type="button" onClick={() => setConfiguring(ag.id)} className="min-w-0 flex-1 text-left">
                     <strong className="text-white">{ag.name}</strong>
                     <span className="block truncate text-xs text-slate-400">{ag.desc}</span>
-                  </span>
-                </button>
+                    <span className="mt-1 inline-flex items-center gap-1 font-mono text-[10px] text-accent">
+                      {cfg.engine} · {cfg.model} <span className="text-slate-600">· configure</span>
+                    </span>
+                  </button>
+                </div>
               );
             })}
           </div>
+
+          {/* Engine/model configurator for the clicked agent. */}
+          {configuring &&
+            (() => {
+              const ag = AGENTS.find((a) => a.id === configuring);
+              if (!ag) return null;
+              const cfg = agentCfg[configuring];
+              return (
+                <div className="card mt-4 p-5">
+                  <div className="flex items-center justify-between">
+                    <strong className="text-white">Configure · {ag.name}</strong>
+                    <button
+                      type="button"
+                      onClick={() => setConfiguring(null)}
+                      className="text-xs font-medium text-slate-400 hover:text-white"
+                    >
+                      Done
+                    </button>
+                  </div>
+
+                  <div className="mt-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">AI engine</div>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                    {ENGINES.map((e) => {
+                      const active = cfg.engine === e.id;
+                      return (
+                        <button
+                          key={e.id}
+                          type="button"
+                          disabled={!e.available}
+                          onClick={() => setCfg(configuring, { engine: e.id })}
+                          className={`rounded-xl border p-3 text-left transition-all ${
+                            active ? "border-accent/60 bg-accent/10" : "border-white/10"
+                          } ${e.available ? "hover:border-white/30" : "cursor-not-allowed opacity-50"}`}
+                        >
+                          <div className="text-sm font-semibold text-white">{e.name}</div>
+                          <div className="font-mono text-[10px] text-slate-400">{e.available ? "available" : "coming soon"}</div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {cfg.engine === "claude" && (
+                    <>
+                      <div className="mt-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Model</div>
+                      <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                        {CLAUDE_MODELS.map((m) => {
+                          const active = cfg.model === m.id;
+                          return (
+                            <button
+                              key={m.id}
+                              type="button"
+                              onClick={() => setCfg(configuring, { model: m.id })}
+                              className={`rounded-xl border p-3 text-left transition-all ${
+                                active ? "border-accent/60 bg-accent/10" : "border-white/10 hover:border-white/30"
+                              }`}
+                            >
+                              <div className="text-sm font-semibold text-white">{m.name}</div>
+                              <div className="font-mono text-[10px] text-slate-400">{m.note}</div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })()}
         </section>
 
         {/* Agent handoff — how work passes between agents via Jira labels. */}
