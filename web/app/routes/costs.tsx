@@ -56,7 +56,7 @@ export default function Costs() {
             <NavLink href="/">Runs</NavLink>
             <NavLink href="/projects">Projects</NavLink>
             <NavLink href="/configure">Configure</NavLink>
-            <span className="hidden text-sm text-slate-500 sm:inline">{email}</span>
+            <a href="/profile" className="hidden text-sm text-slate-400 transition-colors hover:text-white sm:inline">{email}</a>
             <a href="/logout" className="btn-ghost !px-3.5 !py-2">Log out</a>
           </>
         }

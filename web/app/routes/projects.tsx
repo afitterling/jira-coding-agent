@@ -127,7 +127,7 @@ export default function Projects() {
             <NavLink href="/">Runs</NavLink>
             <NavLink href="/costs">Costs</NavLink>
             <NavLink href="/configure">Configure</NavLink>
-            <span className="hidden text-sm text-slate-500 sm:inline">{email}</span>
+            <a href="/profile" className="hidden text-sm text-slate-400 transition-colors hover:text-white sm:inline">{email}</a>
             <a href="/logout" className="btn-ghost !px-3.5 !py-2">Log out</a>
           </>
         }
@@ -173,7 +173,7 @@ export default function Projects() {
                     Edit
                   </Link>
                   <Link
-                    to="/configure"
+                    to={`/configure?project=${p.projectId}`}
                     className="rounded-lg border border-white/15 px-3 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:border-white/30 hover:bg-white/5"
                   >
                     Configure
@@ -273,7 +273,10 @@ export default function Projects() {
               >
                 {busy ? "Saving…" : editing ? "Save changes" : "Add project"}
               </button>
-              <Link to="/configure" className="btn-ghost">
+              <Link
+                to={editing ? `/configure?project=${editing.projectId}` : "/configure"}
+                className="btn-ghost"
+              >
                 Configure architecture &amp; agents →
               </Link>
             </div>
