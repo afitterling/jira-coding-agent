@@ -19,28 +19,38 @@ const ARCHITECTURES = [
   { id: "multi", name: "Multi-agent pipeline", tag: "specialised agents", desc: "Distinct agents hand off across the pipeline for higher quality on complex work." },
 ] as const;
 
-const AGENTS = [
-  { id: "reviser", name: "Reviser", stage: "Revise", desc: "Turns a raw story into a crisp, testable spec." },
-  { id: "implementer", name: "Implementer", stage: "Implement", desc: "Writes the code for a ready story." },
-  { id: "tester", name: "Tester", stage: "Test", desc: "Derives and runs the test cases." },
-  { id: "qa", name: "QA", stage: "QA", desc: "Checks completeness, edge cases, regressions." },
-  { id: "reviewer", name: "Reviewer", stage: "PR", desc: "Final review before the PR is opened." },
-] as const;
+interface AgentDef {
+  id: string;
+  name: string;
+  desc: string;
+  /** Pipeline stage label — shown in the Flow row. Advisor agents have none. */
+  stage?: string;
+  /** Enabled by default. */
+  on?: boolean;
+}
 
-type AgentId = (typeof AGENTS)[number]["id"];
+const AGENTS: AgentDef[] = [
+  { id: "reviser", name: "Reviser", stage: "Revise", desc: "Turns a raw story into a crisp, testable spec.", on: true },
+  { id: "implementer", name: "Implementer", stage: "Implement", desc: "Writes the code for a ready story.", on: true },
+  { id: "tester", name: "Tester", stage: "Test", desc: "Derives and runs the test cases.", on: true },
+  { id: "qa", name: "QA", stage: "QA", desc: "Checks completeness, edge cases, regressions.", on: true },
+  { id: "reviewer", name: "Reviewer", stage: "PR", desc: "Final review before the PR is opened." },
+  { id: "risk", name: "Risk Assessment", desc: "Flags delivery, security, and compliance risk in a story." },
+  { id: "financial-advisor", name: "Financial Advisor", desc: "Weighs cost/benefit and ROI of the proposed work." },
+  { id: "cfo-assistant", name: "CFO assistant", desc: "Tracks budget impact and spend against the plan." },
+];
+
+// Stages shown in the Flow row (the core software pipeline).
+const PIPELINE = AGENTS.filter((a) => a.stage);
 
 export default function Configure() {
   const { email } = useLoaderData<typeof loader>();
   const [arch, setArch] = useState<string>("fargate");
-  const [agents, setAgents] = useState<Record<AgentId, boolean>>({
-    reviser: true,
-    implementer: true,
-    tester: true,
-    qa: true,
-    reviewer: false,
-  });
+  const [agents, setAgents] = useState<Record<string, boolean>>(
+    Object.fromEntries(AGENTS.map((a) => [a.id, Boolean(a.on)])),
+  );
 
-  const toggle = (id: AgentId) => setAgents((a) => ({ ...a, [id]: !a[id] }));
+  const toggle = (id: string) => setAgents((a) => ({ ...a, [id]: !a[id] }));
 
   return (
     <>
@@ -122,7 +132,7 @@ export default function Configure() {
         <section className="mt-10">
           <Eyebrow>Flow</Eyebrow>
           <div className="card flex flex-wrap items-center gap-2 p-6">
-            {AGENTS.map((ag, i) => {
+            {PIPELINE.map((ag, i) => {
               const on = agents[ag.id];
               return (
                 <span key={ag.id} className="flex items-center gap-2">
@@ -131,7 +141,7 @@ export default function Configure() {
                   >
                     {ag.stage}
                   </span>
-                  {i < AGENTS.length - 1 && <span className="text-slate-600">→</span>}
+                  {i < PIPELINE.length - 1 && <span className="text-slate-600">→</span>}
                 </span>
               );
             })}

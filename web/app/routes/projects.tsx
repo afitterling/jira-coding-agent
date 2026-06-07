@@ -258,14 +258,19 @@ export default function Projects() {
                 : "Tokens are stored in AWS Secrets Manager — never in the database or logs."}
             </p>
             {formError && <Note tone="error">{formError}</Note>}
-            <button
-              name="intent"
-              value={editing ? "update" : "create"}
-              disabled={busy}
-              className="btn-primary mt-1"
-            >
-              {busy ? "Saving…" : editing ? "Save changes" : "Add project"}
-            </button>
+            <div className="mt-1 flex flex-wrap items-center gap-3">
+              <button
+                name="intent"
+                value={editing ? "update" : "create"}
+                disabled={busy}
+                className="btn-primary"
+              >
+                {busy ? "Saving…" : editing ? "Save changes" : "Add project"}
+              </button>
+              <Link to="/configure" className="btn-ghost">
+                Configure architecture &amp; agents →
+              </Link>
+            </div>
           </Form>
         </section>
       </main>
