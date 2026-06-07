@@ -96,6 +96,8 @@ const AGENTS: AgentDef[] = [
   { id: "risk", name: "Risk Assessment", desc: "Flags delivery, security, and compliance risk in a story." },
   { id: "financial-advisor", name: "Financial Advisor", desc: "Weighs cost/benefit and ROI of the proposed work." },
   { id: "cfo-assistant", name: "CFO assistant", desc: "Tracks budget impact and spend against the plan." },
+  { id: "cyber-reviewer", name: "Cyber Security Reviewer", desc: "Audits the change for vulnerabilities before it ships." },
+  { id: "cyber-reactive", name: "Cyber Sec Reactive Expert", desc: "Responds to live security findings and incidents." },
 ];
 
 // AI engine per agent. Only Claude is available today; others are placeholders.
@@ -171,7 +173,7 @@ export default function Configure() {
           preview · not yet wired
         </span>
         <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-          Configure your <span className="text-gradient">agent</span>
+          Configure your <span className="text-gradient">agentic fabric</span>
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-slate-400">
           Choose how the system runs, which agents take part, and how work flows between them.
@@ -366,14 +368,68 @@ export default function Configure() {
   );
 }
 
-// ---- Agent handoff diagram -------------------------------------------------
-// A left → right chain: Jira labels (pills) and agents (cards) connected by
-// arrows. Each agent shows whether it PROCESSES (transforms) or DECIDES
-// (pass/fail); a decider's failure label is shown routing back.
+// ---- Agent handoff diagram (freestyle) -------------------------------------
+// A free-form node graph: Jira source → enabled agents → Done, drawn with
+// curved connectors carrying the handed-off Jira label. Nodes are draggable;
+// the connections follow. Deciders show a dashed failure loop back.
+
+const NODE_W = 152;
+const NODE_H = 64;
+
+interface GNode {
+  id: string;
+  title: string;
+  sub: string;
+  kind: "source" | "agent" | "sink";
+  tone: "cyan" | "accent" | "violet" | "slate";
+  cost?: number;
+  fail?: string;
+}
 
 function HandoffDiagram({ agents }: { agents: Record<string, boolean> }) {
   const active = PIPELINE_FLOW.filter((a) => agents[a.id]);
   const totalCost = active.reduce((s, a) => s + a.cost, 0);
+
+  const nodes: GNode[] = [
+    { id: "jira", title: "Jira", sub: "board", kind: "source", tone: "cyan" },
+    ...active.map<GNode>((a) => ({
+      id: a.id,
+      title: a.name,
+      sub: a.role,
+      kind: "agent",
+      tone: a.role === "decides" ? "violet" : "accent",
+      cost: a.cost,
+      fail: a.fail,
+    })),
+    { id: "done", title: "Done", sub: "shipped", kind: "sink", tone: "slate" },
+  ];
+
+  // Persisted drag overrides; default layout is an organic zig-zag.
+  const [pos, setPos] = useState<Record<string, { x: number; y: number }>>({});
+  const wrap = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ id: string; dx: number; dy: number } | null>(null);
+
+  const def = (i: number) => ({ x: 24 + i * 168, y: 28 + (i % 2 ? 116 : 0) });
+  const idx = (id: string) => nodes.findIndex((n) => n.id === id);
+  const at = (id: string) => pos[id] ?? def(idx(id));
+
+  const onDown = (e: React.PointerEvent, id: string) => {
+    if (!wrap.current) return;
+    const r = wrap.current.getBoundingClientRect();
+    const p = at(id);
+    drag.current = { id, dx: e.clientX - r.left - p.x, dy: e.clientY - r.top - p.y };
+    (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
+  };
+  const onMove = (e: React.PointerEvent) => {
+    if (!drag.current || !wrap.current) return;
+    const r = wrap.current.getBoundingClientRect();
+    const x = Math.max(0, e.clientX - r.left - drag.current.dx);
+    const y = Math.max(0, e.clientY - r.top - drag.current.dy);
+    setPos((p) => ({ ...p, [drag.current!.id]: { x, y } }));
+  };
+  const onUp = () => {
+    drag.current = null;
+  };
 
   if (active.length === 0) {
     return (
@@ -383,58 +439,108 @@ function HandoffDiagram({ agents }: { agents: Record<string, boolean> }) {
     );
   }
 
-  const Label = ({ text }: { text: string }) => (
-    <span className="inline-flex shrink-0 items-center rounded-md border border-white/10 bg-white/5 px-2.5 py-1 font-mono text-xs text-slate-300">
-      #{text}
-    </span>
-  );
-  const Arrow = () => <span aria-hidden className="shrink-0 text-lg text-slate-600">→</span>;
+  // Build edges: source → first agent (inLabel), agent → next (outLabel),
+  // last agent → done (outLabel), plus dashed failure loops back.
+  type Edge = { from: string; to: string; label: string; dashed?: boolean };
+  const edges: Edge[] = [];
+  for (let i = 0; i < nodes.length - 1; i++) {
+    const from = nodes[i];
+    const label =
+      from.kind === "source" ? active[0].inLabel : active.find((a) => a.id === from.id)?.outLabel ?? "";
+    edges.push({ from: from.id, to: nodes[i + 1].id, label });
+  }
+  active.forEach((a) => {
+    if (a.fail) edges.push({ from: a.id, to: nodes[idx(a.id) - 1].id, label: a.fail, dashed: true });
+  });
+
+  const anchors = (fromId: string, toId: string) => {
+    const f = at(fromId);
+    const t = at(toId);
+    const forward = t.x + NODE_W / 2 >= f.x + NODE_W / 2;
+    const a = { x: forward ? f.x + NODE_W : f.x, y: f.y + NODE_H / 2 };
+    const b = { x: forward ? t.x : t.x + NODE_W, y: t.y + NODE_H / 2 };
+    return { a, b, forward };
+  };
+
+  const width = Math.max(640, nodes.length * 168 + 40);
+  const height = 240;
+  const toneRing: Record<GNode["tone"], string> = {
+    cyan: "border-accent-cyan/50 bg-accent-cyan/10",
+    accent: "border-accent/50 bg-accent/10",
+    violet: "border-accent-violet/50 bg-accent-violet/10",
+    slate: "border-white/15 bg-white/5",
+  };
 
   return (
-    <div className="card overflow-x-auto p-6">
-      <div className="flex min-w-max items-center gap-2">
-        {/* The first enabled agent's incoming label starts the chain. */}
-        <Label text={active[0].inLabel} />
-        {active.map((a) => {
-          const decides = a.role === "decides";
-          return (
-            <div key={a.id} className="flex items-center gap-2">
-              <Arrow />
-              <span
-                className={`grid place-items-center rounded-xl border px-3.5 py-2 text-center ${
-                  decides ? "border-accent-violet/50 bg-accent-violet/10" : "border-accent/50 bg-accent/10"
-                }`}
+    <div className="card p-4">
+      <div className="overflow-x-auto">
+        <div
+          ref={wrap}
+          onPointerMove={onMove}
+          onPointerUp={onUp}
+          onPointerLeave={onUp}
+          className="relative bg-grid"
+          style={{ width, height }}
+        >
+          <svg className="pointer-events-none absolute inset-0" width={width} height={height}>
+            <defs>
+              <marker id="hgArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" fill="rgb(100 116 139)" />
+              </marker>
+            </defs>
+            {edges.map((e, i) => {
+              const { a, b, forward } = anchors(e.from, e.to);
+              const dx = Math.max(40, Math.abs(b.x - a.x) / 2);
+              const c1x = a.x + (forward ? dx : -dx);
+              const c2x = b.x + (forward ? -dx : dx);
+              const mx = (a.x + b.x) / 2;
+              const my = (a.y + b.y) / 2 + (e.dashed ? 22 : 0);
+              return (
+                <g key={i}>
+                  <path
+                    d={`M ${a.x} ${a.y} C ${c1x} ${a.y}, ${c2x} ${b.y}, ${b.x} ${b.y}`}
+                    fill="none"
+                    stroke={e.dashed ? "rgb(248 113 113 / 0.6)" : "rgb(100 116 139 / 0.8)"}
+                    strokeWidth="1.5"
+                    strokeDasharray={e.dashed ? "5 4" : undefined}
+                    markerEnd="url(#hgArrow)"
+                  />
+                  <text x={mx} y={my - 4} textAnchor="middle" className="fill-slate-300 font-mono" style={{ fontSize: 10 }}>
+                    #{e.label}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+
+          {nodes.map((n) => {
+            const p = at(n.id);
+            return (
+              <div
+                key={n.id}
+                onPointerDown={(e) => onDown(e, n.id)}
+                className={`absolute grid cursor-grab place-items-center rounded-xl border text-center shadow-card active:cursor-grabbing ${toneRing[n.tone]}`}
+                style={{ left: p.x, top: p.y, width: NODE_W, height: NODE_H, touchAction: "none" }}
               >
-                <span className="text-sm font-semibold text-white">{a.name}</span>
-                <span
-                  className={`mt-0.5 inline-flex items-center rounded-full px-2 py-0.5 font-mono text-[10px] ${
-                    decides ? "bg-accent-violet/20 text-accent-violet" : "bg-accent/20 text-accent"
-                  }`}
-                >
-                  {a.role}
+                <span className="text-sm font-semibold text-white">{n.title}</span>
+                <span className="font-mono text-[10px] text-slate-400">
+                  {n.sub}
+                  {n.cost != null ? ` · ~$${n.cost.toFixed(2)}` : ""}
                 </span>
-                <span className="mt-1 font-mono text-[10px] text-slate-400">~${a.cost.toFixed(2)}/story</span>
-                {a.fail && (
-                  <span className="mt-1 font-mono text-[10px] text-red-300/80">✗ ↻ #{a.fail}</span>
-                )}
-              </span>
-              <Arrow />
-              {/* The label this agent hands off. */}
-              <Label text={a.outLabel} />
-            </div>
-          );
-        })}
+                {n.fail && <span className="font-mono text-[9px] text-red-300/80">✗ ↻ #{n.fail}</span>}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500">
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500">
+        <span>Drag nodes to rearrange — the connections follow.</span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-accent" /> processes — transforms the work
+          <span className="h-2.5 w-2.5 rounded-full bg-accent" /> processes
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-accent-violet" /> decides — pass/fail gate
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <span className="text-red-300/80">✗ ↻</span> failure routes back with that label
+          <span className="h-2.5 w-2.5 rounded-full bg-accent-violet" /> decides
         </span>
         <span className="ml-auto rounded-lg border border-white/10 bg-white/5 px-3 py-1 font-mono text-slate-200">
           {active.length} agents · ~${totalCost.toFixed(2)}/story
