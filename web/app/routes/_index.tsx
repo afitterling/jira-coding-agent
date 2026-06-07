@@ -52,6 +52,7 @@ export default function Dashboard() {
             {user ? (
               <>
                 <NavLink href="/projects">Projects</NavLink>
+                <NavLink href="/configure">Configure</NavLink>
                 <span className="hidden text-sm text-slate-500 sm:inline">{user.email}</span>
                 <a href="/logout" className="btn-ghost !px-3.5 !py-2">Log out</a>
               </>

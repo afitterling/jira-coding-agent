@@ -31,6 +31,7 @@ export const en = {
     ],
     pricing: "Pricing",
     cta: "See the flow",
+    start: "Getting started",
     github: "GitHub",
     toggleLabel: "Language",
     menuAria: "Toggle navigation",

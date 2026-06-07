@@ -87,7 +87,27 @@ export type AuthResult =
   | { ok: false; error: string }
   | { ok: false; error: string; needsConfirmation: true };
 
+/** Allow-list of emails/domains permitted to sign up (SIGNUP_ALLOWLIST, comma-separated).
+ *  Empty/unset = open signup. Entries may be exact ("a@b.com") or a domain ("b.com"/"@b.com"). */
+export function isSignupAllowed(email: string): boolean {
+  const raw = (process.env.SIGNUP_ALLOWLIST ?? "").trim();
+  if (!raw) return true; // no allow-list configured → open signup
+  const e = email.trim().toLowerCase();
+  const domain = e.split("@")[1] ?? "";
+  return raw
+    .split(",")
+    .map((s) => s.trim().toLowerCase().replace(/^@/, ""))
+    .filter(Boolean)
+    .some((entry) => entry === e || entry === domain);
+}
+
 export async function signUp(email: string, password: string): Promise<AuthResult> {
+  if (!isSignupAllowed(email)) {
+    return {
+      ok: false,
+      error: "Sign-up is blocked for this email. Please ask an admin to grant access.",
+    };
+  }
   try {
     await idp.send(
       new SignUpCommand({

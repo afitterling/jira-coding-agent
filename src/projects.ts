@@ -21,6 +21,8 @@ export interface ProjectItem {
   name: string;
   jiraHost: string;
   jiraEmail: string;
+  /** Jira project key to scope to (e.g. "FIN"); optional. */
+  jiraProject?: string;
   jql?: string;
   model?: string;
   repoUrl?: string;
@@ -57,7 +59,7 @@ export async function loadProjectTenants(): Promise<Tenant[]> {
     tenants.push({
       id: p.projectId,
       jira: { host: normHost(p.jiraHost), email: p.jiraEmail, token: jiraToken },
-      jql: p.jql || defaultJql(),
+      jql: p.jql || defaultJql(p.jiraProject),
       model: p.model || model,
       targetRepo: p.repoUrl || undefined,
       githubToken: githubToken || undefined,

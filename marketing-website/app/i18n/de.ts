@@ -29,6 +29,7 @@ export const de: Content = {
     ],
     pricing: "Preise",
     cta: "Den Ablauf ansehen",
+    start: "Loslegen",
     github: "GitHub",
     toggleLabel: "Sprache",
     menuAria: "Navigation umschalten",

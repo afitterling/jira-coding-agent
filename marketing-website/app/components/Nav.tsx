@@ -7,6 +7,10 @@ const LINK_HREFS = ["#how", "#loop", "#interfaces", "#use-cases", "#data", "#faq
 
 const REPO_URL = "https://github.com/afitterling/jira-coding-agent";
 
+// Deployed dashboard — "Getting started" drops visitors straight into project setup.
+const APP_URL =
+  "https://d3fd7sbat6bqj3.cloudfront.net/projects?edit=test-fd75e6ba#project-form";
+
 export function Nav() {
   const { t } = useT();
   const links = LINK_HREFS.map((href, i) => ({ href, label: t.nav.links[i] }));
@@ -70,8 +74,14 @@ export function Nav() {
             {t.nav.github}
           </a>
           <LanguageToggle className="hidden sm:inline-flex" />
-          <a href="#how" className="btn-primary !px-4 !py-2">
+          <a
+            href="#how"
+            className="hidden text-sm text-slate-400 transition-colors hover:text-white lg:inline-flex"
+          >
             {t.nav.cta}
+          </a>
+          <a href={APP_URL} className="btn-primary !px-4 !py-2">
+            {t.nav.start}
           </a>
           <button
             type="button"
@@ -104,6 +114,13 @@ export function Nav() {
             </a>
           ))}
           <div className="mt-2 border-t border-white/10 pt-3">
+            <a
+              href={APP_URL}
+              onClick={() => setOpen(false)}
+              className="btn-primary mb-3 w-full"
+            >
+              {t.nav.start}
+            </a>
             <a
               href="/pricing"
               onClick={() => setOpen(false)}

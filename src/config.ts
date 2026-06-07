@@ -26,9 +26,11 @@ export interface Tenant {
 
 export const normHost = (h: string) => h.replace(/^https?:\/\//, "").replace(/\/$/, "");
 
-export function defaultJql(): string {
+export function defaultJql(projectKey?: string): string {
   const { revise, ready, implemented, tested } = labels;
-  return `(labels in ("${revise}", "${ready}", "${implemented}", "${tested}")) ORDER BY updated DESC`;
+  const labelClause = `(labels in ("${revise}", "${ready}", "${implemented}", "${tested}"))`;
+  const scope = projectKey ? `project = "${projectKey}" AND ` : "";
+  return `${scope}${labelClause} ORDER BY updated DESC`;
 }
 
 /**

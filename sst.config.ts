@@ -110,10 +110,17 @@ export default $config({
     const cluster = new sst.aws.Cluster("Cluster", { vpc });
 
     // --- Isolated per-story coding agent (Claude Code CLI in the image) ------
+    // The runner image is PREBUILT and pushed to ECR (see scripts/build-runner.sh),
+    // so `sst deploy` on any stage/machine/CI just references it — no local Docker
+    // needed. Override the tag/URI per deploy with RUNNER_IMAGE. To go back to
+    // building at deploy time, set `image: { context: "runner" }` instead.
+    const runnerImage =
+      process.env.RUNNER_IMAGE ??
+      "327261196437.dkr.ecr.eu-central-1.amazonaws.com/jira-coding-agent-runner:latest";
     const runner = new sst.aws.Task("Runner", {
       cluster,
       link: [runs],
-      image: { context: "runner" },
+      image: runnerImage,
       memory: "2 GB",
       cpu: "1 vCPU",
       environment: {
@@ -148,9 +155,10 @@ export default $config({
       permissions: [
         // Read this app's cost across all stages from Cost Explorer (public dashboard).
         { actions: ["ce:GetCostAndUsage", "ce:GetTags"], resources: ["*"] },
-        // Manage per-project credential secrets (create on add, delete on remove).
+        // Manage per-project credential secrets (create on add, read+rotate on
+        // edit, delete on remove).
         {
-          actions: ["secretsmanager:CreateSecret", "secretsmanager:PutSecretValue", "secretsmanager:DeleteSecret", "secretsmanager:TagResource"],
+          actions: ["secretsmanager:CreateSecret", "secretsmanager:GetSecretValue", "secretsmanager:PutSecretValue", "secretsmanager:DeleteSecret", "secretsmanager:TagResource"],
           resources: [secretArnPattern],
         },
       ],
@@ -165,6 +173,8 @@ export default $config({
         COGNITO_CLIENT_ID: userPoolClient.id,
         // Namespace for per-project credential secrets.
         SECRET_PREFIX: secretPrefix,
+        // Allow-list for self-signup (comma-separated emails/domains; empty = open).
+        SIGNUP_ALLOWLIST: process.env.SIGNUP_ALLOWLIST ?? "",
       },
     });
 

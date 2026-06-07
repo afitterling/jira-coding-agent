@@ -29,6 +29,7 @@ export const ms: Content = {
     ],
     pricing: "Harga",
     cta: "Lihat alirannya",
+    start: "Mula sekarang",
     github: "GitHub",
     toggleLabel: "Bahasa",
     menuAria: "Togol navigasi",

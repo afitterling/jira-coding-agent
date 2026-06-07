@@ -31,6 +31,7 @@ export const zh: Content = {
     ],
     pricing: "定价",
     cta: "查看流程",
+    start: "开始使用",
     github: "GitHub",
     toggleLabel: "语言",
     menuAria: "切换导航",
