@@ -8,6 +8,7 @@ import {
   type CostReport,
   type ProjectCost,
 } from "~/lib/costs.server";
+import { AppHeader, Empty, Eyebrow, NavLink, Note } from "~/lib/ui";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await getUser(request);
@@ -48,165 +49,124 @@ export default function Costs() {
   const maxMonth = report ? Math.max(1, ...report.months.map((m) => m.amount)) : 1;
 
   return (
-    <main style={{ maxWidth: 1000, margin: "0 auto", padding: "32px 24px" }}>
-      <header style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
-        <h1 style={{ fontSize: 24, margin: 0 }}>💸 Cost</h1>
-        <span style={{ color: "#64748b", fontSize: 13 }}>
-          {admin ? "admin · all stages & projects" : "your projects"}
-        </span>
-        <span style={{ marginLeft: "auto", display: "flex", gap: 12, alignItems: "center" }}>
-          <span style={{ color: "#64748b", fontSize: 13 }}>{email}</span>
-          <a href="/" style={link}>← runs</a>
-          <a href="/logout" style={link}>log out</a>
-        </span>
-      </header>
+    <>
+      <AppHeader
+        right={
+          <>
+            <NavLink href="/">Runs</NavLink>
+            <NavLink href="/projects">Projects</NavLink>
+            <span className="hidden text-sm text-slate-500 sm:inline">{email}</span>
+            <a href="/logout" className="btn-ghost !px-3.5 !py-2">Log out</a>
+          </>
+        }
+      />
 
-      {error && <Note tone="error">Cost Explorer error: {error}</Note>}
+      <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+        <div className="flex flex-wrap items-end gap-3">
+          <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+            <span className="text-gradient">Cost</span>
+          </h1>
+          <span className="pb-1.5 font-mono text-xs text-slate-500">
+            {admin ? "admin · all stages & projects" : "your projects"}
+          </span>
+        </div>
 
-      {/* ---- Admin: app-wide cost (all stages × service) -------------------- */}
-      {admin && report && !report.tagsActive && (
-        <Note tone="warn">
-          The <code>sst:app</code>/<code>sst:stage</code> cost-allocation tags don&apos;t appear active
-          yet. Activate them in <strong>Billing → Cost allocation tags</strong> (data lags up to 24h).
-        </Note>
-      )}
+        {error && <div className="mt-6"><Note tone="error">Cost Explorer error: {error}</Note></div>}
 
-      {admin && report && (
-        <>
-          <section style={{ ...card, marginTop: 20, display: "flex", alignItems: "baseline", gap: 16 }}>
-            <span style={{ fontSize: 13, color: "#64748b" }}>
-              {report.periodStart} → {report.periodEnd}
-            </span>
-            <span style={{ marginLeft: "auto", fontSize: 13, color: "#64748b" }}>app total</span>
-            <strong style={{ fontSize: 26 }}>{money(report.grandTotal, currency)}</strong>
-          </section>
-
-          <section style={{ marginTop: 24 }}>
-            <h2 style={sectionTitle}>Monthly trend</h2>
-            <div style={{ ...card, display: "flex", gap: 12, alignItems: "flex-end", height: 140 }}>
-              {report.months.map((m) => (
-                <div key={m.month} style={{ flex: 1, textAlign: "center" }}>
-                  <div
-                    title={money(m.amount, currency)}
-                    style={{
-                      height: `${Math.round((m.amount / maxMonth) * 90)}px`,
-                      background: "#6366f1",
-                      borderRadius: "4px 4px 0 0",
-                      margin: "0 auto",
-                      minHeight: 2,
-                    }}
-                  />
-                  <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 6 }}>{m.month.slice(5)}</div>
-                  <div style={{ fontSize: 11, color: "#64748b" }}>{money(m.amount, currency)}</div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section style={{ marginTop: 24 }}>
-            <h2 style={sectionTitle}>By stage &amp; AWS position</h2>
-            {report.stages.length === 0 && <Empty>No cost recorded for this app in the period.</Empty>}
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              {report.stages.map((s) => (
-                <div key={s.stage} style={card}>
-                  <div style={{ display: "flex", alignItems: "baseline", marginBottom: 8 }}>
-                    <strong style={{ fontSize: 16, color: "#e2e8f0" }}>{s.stage}</strong>
-                    <strong style={{ marginLeft: "auto", fontSize: 16 }}>{money(s.total, currency)}</strong>
-                  </div>
-                  {s.services.map((svc) => (
-                    <div key={svc.service} style={posRow}>
-                      <span style={{ color: "#cbd5e1" }}>{svc.service}</span>
-                      <span style={{ textAlign: "right", color: "#94a3b8" }}>{money(svc.amount, currency)}</span>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </section>
-        </>
-      )}
-
-      {/* ---- Per-project cost (admin: all; owner: only theirs) -------------- */}
-      <section style={{ marginTop: 24 }}>
-        <h2 style={sectionTitle}>
-          {admin ? "By project (estimated)" : "Your projects (estimated)"}
-        </h2>
-        {projects.length === 0 && (
-          <Empty>{admin ? "No projects yet." : "You have no projects, or no cost attributed yet."}</Empty>
-        )}
-        {projects.length > 0 && (
-          <div style={card}>
-            <div style={{ ...posRow, borderTop: "none", color: "#64748b", fontWeight: 600 }}>
-              <span>project</span>
-              <span style={{ textAlign: "right" }}>runner</span>
-              <span style={{ textAlign: "right" }}>shared</span>
-              <span style={{ textAlign: "right" }}>total</span>
-            </div>
-            {projects.map((p) => (
-              <div key={p.projectId} style={projRow}>
-                <span style={{ color: "#e2e8f0" }}>
-                  {p.name}
-                  {admin && <span style={{ color: "#64748b" }}> · {p.ownerEmail}</span>}
-                  <span style={{ color: "#475569", fontSize: 12 }}> · {p.runnerRuns} runs</span>
-                </span>
-                <span style={{ textAlign: "right", color: "#94a3b8" }}>{money(p.runnerCost, currency)}</span>
-                <span style={{ textAlign: "right", color: "#94a3b8" }}>{money(p.sharedCost, currency)}</span>
-                <span style={{ textAlign: "right", color: "#e2e8f0", fontWeight: 600 }}>{money(p.total, currency)}</span>
-              </div>
-            ))}
+        {/* ---- Admin: app-wide cost (all stages × service) -------------------- */}
+        {admin && report && !report.tagsActive && (
+          <div className="mt-6">
+            <Note tone="warn">
+              The <code className="font-mono">sst:app</code>/<code className="font-mono">sst:stage</code> cost-allocation
+              tags don&apos;t appear active yet. Activate them in <strong>Billing → Cost allocation tags</strong> (data lags up to 24h).
+            </Note>
           </div>
         )}
-        <p style={{ color: "#475569", fontSize: 12, marginTop: 12 }}>
-          Estimate: Fargate/ECS cost split by runner-dispatch count; shared infra split equally per
-          project. Source: AWS Cost Explorer (UnblendedCost).
-        </p>
-      </section>
-    </main>
-  );
-}
 
-const sectionTitle: React.CSSProperties = {
-  fontSize: 13,
-  textTransform: "uppercase",
-  letterSpacing: 1,
-  color: "#64748b",
-  marginBottom: 12,
-};
-const card: React.CSSProperties = {
-  background: "#111827",
-  border: "1px solid #1e293b",
-  borderRadius: 10,
-  padding: 16,
-};
-const link: React.CSSProperties = { color: "#818cf8", fontSize: 13, textDecoration: "none" };
-const posRow: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "1fr 110px",
-  gap: 10,
-  padding: "5px 0",
-  borderTop: "1px solid #1e293b",
-  fontSize: 13,
-  fontFamily: "ui-monospace, monospace",
-};
-const projRow: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "1fr 110px 110px 110px",
-  gap: 10,
-  padding: "6px 0",
-  borderTop: "1px solid #1e293b",
-  fontSize: 13,
-  fontFamily: "ui-monospace, monospace",
-};
+        {admin && report && (
+          <>
+            <section className="card mt-6 flex flex-wrap items-baseline gap-4 p-6">
+              <span className="font-mono text-xs text-slate-500">
+                {report.periodStart} → {report.periodEnd}
+              </span>
+              <span className="ml-auto eyebrow">app total</span>
+              <strong className="text-3xl font-extrabold text-white">{money(report.grandTotal, currency)}</strong>
+            </section>
 
-function Empty({ children }: { children: React.ReactNode }) {
-  return <div style={{ padding: 16, color: "#64748b", fontSize: 14 }}>{children}</div>;
-}
+            <section className="mt-10">
+              <Eyebrow>Monthly trend</Eyebrow>
+              <div className="card flex h-44 items-end gap-3 p-6">
+                {report.months.map((m) => (
+                  <div key={m.month} className="group flex-1 text-center">
+                    <div
+                      title={money(m.amount, currency)}
+                      className="mx-auto w-full rounded-t-md bg-gradient-to-t from-accent to-accent-violet transition-opacity group-hover:opacity-80"
+                      style={{ height: `${Math.round((m.amount / maxMonth) * 90)}px`, minHeight: 2 }}
+                    />
+                    <div className="mt-2 font-mono text-[11px] text-slate-400">{m.month.slice(5)}</div>
+                    <div className="font-mono text-[11px] text-slate-600">{money(m.amount, currency)}</div>
+                  </div>
+                ))}
+              </div>
+            </section>
 
-function Note({ tone, children }: { tone: "warn" | "error"; children: React.ReactNode }) {
-  const c = tone === "error" ? "#f87171" : "#fbbf24";
-  return (
-    <div style={{ marginTop: 16, padding: "10px 14px", border: `1px solid ${c}33`, background: `${c}11`, borderRadius: 8, color: c, fontSize: 13 }}>
-      {children}
-    </div>
+            <section className="mt-10">
+              <Eyebrow>By stage &amp; AWS position</Eyebrow>
+              {report.stages.length === 0 && <Empty>No cost recorded for this app in the period.</Empty>}
+              <div className="flex flex-col gap-4">
+                {report.stages.map((s) => (
+                  <div key={s.stage} className="card p-5">
+                    <div className="mb-3 flex items-baseline">
+                      <strong className="text-base text-white">{s.stage}</strong>
+                      <strong className="ml-auto text-base text-white">{money(s.total, currency)}</strong>
+                    </div>
+                    {s.services.map((svc) => (
+                      <div key={svc.service} className="grid grid-cols-[1fr_110px] gap-3 border-t border-white/5 py-1.5 font-mono text-xs">
+                        <span className="text-slate-300">{svc.service}</span>
+                        <span className="text-right text-slate-400">{money(svc.amount, currency)}</span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </section>
+          </>
+        )}
+
+        {/* ---- Per-project cost (admin: all; owner: only theirs) -------------- */}
+        <section className="mt-10">
+          <Eyebrow>{admin ? "By project (estimated)" : "Your projects (estimated)"}</Eyebrow>
+          {projects.length === 0 && (
+            <Empty>{admin ? "No projects yet." : "You have no projects, or no cost attributed yet."}</Empty>
+          )}
+          {projects.length > 0 && (
+            <div className="card p-5">
+              <div className="grid grid-cols-[1fr_110px_110px_110px] gap-3 pb-1.5 font-mono text-xs font-semibold text-slate-500">
+                <span>project</span>
+                <span className="text-right">runner</span>
+                <span className="text-right">shared</span>
+                <span className="text-right">total</span>
+              </div>
+              {projects.map((p) => (
+                <div key={p.projectId} className="grid grid-cols-[1fr_110px_110px_110px] gap-3 border-t border-white/5 py-2 font-mono text-xs">
+                  <span className="text-white">
+                    {p.name}
+                    {admin && <span className="text-slate-500"> · {p.ownerEmail}</span>}
+                    <span className="text-slate-600"> · {p.runnerRuns} runs</span>
+                  </span>
+                  <span className="text-right text-slate-400">{money(p.runnerCost, currency)}</span>
+                  <span className="text-right text-slate-400">{money(p.sharedCost, currency)}</span>
+                  <span className="text-right font-semibold text-white">{money(p.total, currency)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <p className="mt-3 text-xs text-slate-600">
+            Estimate: Fargate/ECS cost split by runner-dispatch count; shared infra split equally per
+            project. Source: AWS Cost Explorer (UnblendedCost).
+          </p>
+        </section>
+      </main>
+    </>
   );
 }

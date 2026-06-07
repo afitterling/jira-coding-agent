@@ -1,60 +1,38 @@
-/** Shared styling + shell for the auth pages (signup / confirm / login). */
+/** Shared shell for the auth pages (signup / confirm / login). */
+import { Logo, Note } from "~/lib/ui";
 
-export const field: React.CSSProperties = {
-  background: "#0b1220",
-  color: "#e2e8f0",
-  border: "1px solid #1e293b",
-  borderRadius: 8,
-  padding: "10px 12px",
-  fontSize: 14,
-};
-
-export const btn: React.CSSProperties = {
-  background: "#6366f1",
-  color: "white",
-  border: "none",
-  borderRadius: 8,
-  padding: "10px 12px",
-  fontSize: 14,
-  fontWeight: 600,
-  cursor: "pointer",
-};
-
-export const errorBox: React.CSSProperties = {
-  border: "1px solid #f8717133",
-  background: "#f8717111",
-  color: "#f87171",
-  borderRadius: 8,
-  padding: "8px 12px",
-  fontSize: 13,
-};
-
-export const okBox: React.CSSProperties = {
-  border: "1px solid #34d39933",
-  background: "#34d39911",
-  color: "#34d399",
-  borderRadius: 8,
-  padding: "8px 12px",
-  fontSize: 13,
-};
+export { Note };
 
 export function AuthShell({
   title,
   subtitle,
   children,
+  footer,
 }: {
   title: string;
   subtitle?: string;
   children: React.ReactNode;
+  footer?: React.ReactNode;
 }) {
   return (
-    <main style={{ maxWidth: 380, margin: "0 auto", padding: "64px 24px" }}>
-      <a href="/" style={{ color: "#818cf8", fontSize: 13, textDecoration: "none" }}>
-        ← Jira Coding Agent
-      </a>
-      <h1 style={{ fontSize: 22, marginTop: 24, marginBottom: 4 }}>{title}</h1>
-      {subtitle && <p style={{ color: "#64748b", fontSize: 14, marginTop: 0 }}>{subtitle}</p>}
-      <div style={{ marginTop: 20 }}>{children}</div>
+    <main className="grid min-h-screen place-items-center px-4 py-16">
+      <div className="w-full max-w-sm animate-fade-up">
+        <div className="mb-6 flex justify-center">
+          <Logo tagline="agentic coding · Jira" />
+        </div>
+
+        <div className="card p-7">
+          <h1 className="text-xl font-bold tracking-tight text-white">{title}</h1>
+          {subtitle && (
+            <p className="mt-1 text-sm text-slate-400">{subtitle}</p>
+          )}
+          <div className="mt-6">{children}</div>
+        </div>
+
+        {footer && (
+          <p className="mt-5 text-center text-sm text-slate-400">{footer}</p>
+        )}
+      </div>
     </main>
   );
 }

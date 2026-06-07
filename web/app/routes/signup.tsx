@@ -1,7 +1,7 @@
 import { json, redirect, type ActionFunctionArgs } from "@remix-run/node";
 import { Form, useActionData, useNavigation } from "@remix-run/react";
 import { signUp } from "~/lib/auth.server";
-import { AuthShell, btn, field, errorBox } from "~/lib/auth-ui";
+import { AuthShell, Note } from "~/lib/auth-ui";
 
 export async function action({ request }: ActionFunctionArgs) {
   const form = await request.formData();
@@ -19,21 +19,29 @@ export default function Signup() {
   const nav = useNavigation();
   const busy = nav.state !== "idle";
   return (
-    <AuthShell title="Create account" subtitle="Sign up — we'll email you a confirmation code.">
-      <Form method="post" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <input name="email" type="email" placeholder="you@example.com" required style={field} />
-        <input name="password" type="password" placeholder="Password" required style={field} />
-        <p style={{ color: "#64748b", fontSize: 12, margin: 0 }}>
-          Min 8 chars, with upper- & lowercase, a number and a symbol.
+    <AuthShell
+      title="Create account"
+      subtitle="Sign up — we'll email you a confirmation code."
+      footer={
+        <>
+          Already have an account?{" "}
+          <a href="/login" className="font-medium text-accent hover:text-accent-violet">
+            Log in
+          </a>
+        </>
+      }
+    >
+      <Form method="post" className="flex flex-col gap-3">
+        <input name="email" type="email" placeholder="you@example.com" required className="field" />
+        <input name="password" type="password" placeholder="Password" required className="field" />
+        <p className="text-xs text-slate-500">
+          Min 8 chars, with upper- &amp; lowercase, a number and a symbol.
         </p>
-        {data?.error && <div style={errorBox}>{data.error}</div>}
-        <button type="submit" disabled={busy} style={btn}>
+        {data?.error && <Note tone="error">{data.error}</Note>}
+        <button type="submit" disabled={busy} className="btn-primary mt-1 w-full">
           {busy ? "Creating…" : "Create account"}
         </button>
       </Form>
-      <p style={{ color: "#64748b", fontSize: 13, marginTop: 16 }}>
-        Already have an account? <a href="/login" style={{ color: "#818cf8" }}>Log in</a>
-      </p>
     </AuthShell>
   );
 }

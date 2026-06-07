@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-ink-950 text-slate-300 antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  ::selection {
+    @apply bg-accent/40 text-white;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Gradient text — matches the marketing hero */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(
+      100deg,
+      #c7d2fe 0%,
+      #a5b4fc 30%,
+      #818cf8 55%,
+      #67e8f9 100%
+    );
+  }
+
+  /* Frosted card */
+  .card {
+    @apply rounded-2xl border border-white/10 bg-white/[0.03] shadow-card backdrop-blur-sm;
+  }
+
+  /* Interactive card (run rows, project rows, …) */
+  .card-hover {
+    @apply transition-all hover:border-white/20 hover:bg-white/[0.05];
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white shadow-glow transition-all hover:bg-accent-violet hover:shadow-[0_0_80px_-12px_rgba(139,92,246,0.6)] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-ink-950 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 px-5 py-3 text-sm font-semibold text-slate-200 transition-colors hover:border-white/30 hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  /* Form input — frosted, accent focus ring */
+  .field {
+    @apply w-full rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 transition-colors focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/30;
+  }
+
+  .field-label {
+    @apply text-xs font-medium text-slate-400;
+  }
+
+  /* Section eyebrow */
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.14em] text-slate-500;
+  }
+
+  /* Top nav link */
+  .nav-link {
+    @apply rounded-lg px-3 py-2 text-sm text-slate-400 transition-colors hover:text-white;
+  }
+
+  /* sp33c logo mark */
+  .logo-mark {
+    @apply grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-accent to-accent-violet text-sm font-bold text-white shadow-glow;
+  }
+}
+
+@layer utilities {
+  /* Subtle dotted grid backdrop */
+  .bg-grid {
+    background-image: radial-gradient(
+      rgba(148, 163, 184, 0.12) 1px,
+      transparent 1px
+    );
+    background-size: 32px 32px;
+  }
+
+  .mask-fade-b {
+    -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  }
+}

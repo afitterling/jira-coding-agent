@@ -1,7 +1,7 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
 import { Form, useActionData, useLoaderData, useNavigation } from "@remix-run/react";
 import { confirmSignUp, resendCode } from "~/lib/auth.server";
-import { AuthShell, btn, field, errorBox, okBox } from "~/lib/auth-ui";
+import { AuthShell, Note } from "~/lib/auth-ui";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const email = new URL(request.url).searchParams.get("email") ?? "";
@@ -35,12 +35,12 @@ export default function Confirm() {
   const busy = nav.state !== "idle";
   return (
     <AuthShell title="Confirm your email" subtitle="Enter the code we emailed you.">
-      <Form method="post" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <input name="email" type="email" defaultValue={email} placeholder="you@example.com" required style={field} />
-        <input name="code" inputMode="numeric" placeholder="Confirmation code" required style={field} />
-        {data?.error && <div style={errorBox}>{data.error}</div>}
-        {data?.resent && <div style={okBox}>A new code has been sent.</div>}
-        <button type="submit" name="intent" value="confirm" disabled={busy} style={btn}>
+      <Form method="post" className="flex flex-col gap-3">
+        <input name="email" type="email" defaultValue={email} placeholder="you@example.com" required className="field" />
+        <input name="code" inputMode="numeric" placeholder="Confirmation code" required className="field text-center font-mono tracking-[0.3em]" />
+        {data?.error && <Note tone="error">{data.error}</Note>}
+        {data?.resent && <Note tone="ok">A new code has been sent.</Note>}
+        <button type="submit" name="intent" value="confirm" disabled={busy} className="btn-primary mt-1 w-full">
           {busy ? "Confirming…" : "Confirm"}
         </button>
         <button
@@ -48,7 +48,7 @@ export default function Confirm() {
           name="intent"
           value="resend"
           disabled={busy}
-          style={{ ...btn, background: "transparent", color: "#818cf8", fontWeight: 400 }}
+          className="text-sm text-slate-400 transition-colors hover:text-white disabled:opacity-60"
         >
           Resend code
         </button>
