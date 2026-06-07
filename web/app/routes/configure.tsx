@@ -47,6 +47,29 @@ const AGENTS: AgentDef[] = [
   { id: "cfo-assistant", name: "CFO assistant", desc: "Tracks budget impact and spend against the plan." },
 ];
 
+// The Jira-label handoff: each agent picks up issues with the incoming label and
+// hands them on with the next. Mirrors src/agent.ts. `id` ties a node to its
+// toggle in the Agents section; `fail` is the label a failed check routes back to.
+type AgentRole = "processes" | "decides";
+interface PipelineAgent {
+  id: string;
+  name: string;
+  role: AgentRole;
+  inLabel: string;
+  outLabel: string;
+  fail?: string;
+  /** Rough est. LLM cost per story this agent runs on — each enabled agent adds to it. */
+  cost: number;
+}
+
+// Ordered pipeline; the diagram is built from whichever of these are enabled.
+const PIPELINE_FLOW: PipelineAgent[] = [
+  { id: "reviser", name: "Reviser", role: "processes", inLabel: "revise", outLabel: "revised", cost: 0.02 },
+  { id: "implementer", name: "Implementer", role: "processes", inLabel: "ready", outLabel: "implemented", cost: 0.14 },
+  { id: "tester", name: "Tester", role: "decides", inLabel: "implemented", outLabel: "tested", fail: "tests-failed", cost: 0.05 },
+  { id: "qa", name: "QA", role: "decides", inLabel: "tested", outLabel: "done", fail: "qa-failed", cost: 0.04 },
+];
+
 export default function Configure() {
   const { email, projects, selected, locked } = useLoaderData<typeof loader>();
   const [arch, setArch] = useState<string>("fargate");
@@ -161,6 +184,12 @@ export default function Configure() {
           </div>
         </section>
 
+        {/* Agent handoff — how work passes between agents via Jira labels. */}
+        <section className="mt-10">
+          <Eyebrow>Agent handoff</Eyebrow>
+          <HandoffDiagram agents={agents} />
+        </section>
+
         {/* Flow editor — editable states, tags, links, and a mock data source. */}
         <section className="mt-10">
           <Eyebrow>Flow</Eyebrow>
@@ -175,6 +204,84 @@ export default function Configure() {
         </div>
       </main>
     </>
+  );
+}
+
+// ---- Agent handoff diagram -------------------------------------------------
+// A left → right chain: Jira labels (pills) and agents (cards) connected by
+// arrows. Each agent shows whether it PROCESSES (transforms) or DECIDES
+// (pass/fail); a decider's failure label is shown routing back.
+
+function HandoffDiagram({ agents }: { agents: Record<string, boolean> }) {
+  const active = PIPELINE_FLOW.filter((a) => agents[a.id]);
+  const totalCost = active.reduce((s, a) => s + a.cost, 0);
+
+  if (active.length === 0) {
+    return (
+      <div className="card p-6">
+        <p className="text-sm text-slate-500">No agents enabled — turn some on above to build the flow.</p>
+      </div>
+    );
+  }
+
+  const Label = ({ text }: { text: string }) => (
+    <span className="inline-flex shrink-0 items-center rounded-md border border-white/10 bg-white/5 px-2.5 py-1 font-mono text-xs text-slate-300">
+      #{text}
+    </span>
+  );
+  const Arrow = () => <span aria-hidden className="shrink-0 text-lg text-slate-600">→</span>;
+
+  return (
+    <div className="card overflow-x-auto p-6">
+      <div className="flex min-w-max items-center gap-2">
+        {/* The first enabled agent's incoming label starts the chain. */}
+        <Label text={active[0].inLabel} />
+        {active.map((a) => {
+          const decides = a.role === "decides";
+          return (
+            <div key={a.id} className="flex items-center gap-2">
+              <Arrow />
+              <span
+                className={`grid place-items-center rounded-xl border px-3.5 py-2 text-center ${
+                  decides ? "border-accent-violet/50 bg-accent-violet/10" : "border-accent/50 bg-accent/10"
+                }`}
+              >
+                <span className="text-sm font-semibold text-white">{a.name}</span>
+                <span
+                  className={`mt-0.5 inline-flex items-center rounded-full px-2 py-0.5 font-mono text-[10px] ${
+                    decides ? "bg-accent-violet/20 text-accent-violet" : "bg-accent/20 text-accent"
+                  }`}
+                >
+                  {a.role}
+                </span>
+                <span className="mt-1 font-mono text-[10px] text-slate-400">~${a.cost.toFixed(2)}/story</span>
+                {a.fail && (
+                  <span className="mt-1 font-mono text-[10px] text-red-300/80">✗ ↻ #{a.fail}</span>
+                )}
+              </span>
+              <Arrow />
+              {/* The label this agent hands off. */}
+              <Label text={a.outLabel} />
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500">
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-full bg-accent" /> processes — transforms the work
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-full bg-accent-violet" /> decides — pass/fail gate
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="text-red-300/80">✗ ↻</span> failure routes back with that label
+        </span>
+        <span className="ml-auto rounded-lg border border-white/10 bg-white/5 px-3 py-1 font-mono text-slate-200">
+          {active.length} agents · ~${totalCost.toFixed(2)}/story
+        </span>
+      </div>
+    </div>
   );
 }
 
