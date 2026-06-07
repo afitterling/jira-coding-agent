@@ -373,8 +373,8 @@ export default function Configure() {
 // curved connectors carrying the handed-off Jira label. Nodes are draggable;
 // the connections follow. Deciders show a dashed failure loop back.
 
-const NODE_W = 152;
-const NODE_H = 64;
+const NODE_W = 140;
+const NODE_H = 60;
 
 interface GNode {
   id: string;
@@ -409,7 +409,7 @@ function HandoffDiagram({ agents }: { agents: Record<string, boolean> }) {
   const wrap = useRef<HTMLDivElement>(null);
   const drag = useRef<{ id: string; dx: number; dy: number } | null>(null);
 
-  const def = (i: number) => ({ x: 24 + i * 168, y: 28 + (i % 2 ? 116 : 0) });
+  const def = (i: number) => ({ x: 16 + i * 150, y: 18 + (i % 2 ? 100 : 0) });
   const idx = (id: string) => nodes.findIndex((n) => n.id === id);
   const at = (id: string) => pos[id] ?? def(idx(id));
 
@@ -462,8 +462,10 @@ function HandoffDiagram({ agents }: { agents: Record<string, boolean> }) {
     return { a, b, forward };
   };
 
-  const width = Math.max(640, nodes.length * 168 + 40);
-  const height = 240;
+  // Canvas grows to contain the nodes (incl. dragged ones), so scrollbars appear
+  // instead of nodes dropping out of view.
+  const width = Math.max(520, ...nodes.map((n) => at(n.id).x + NODE_W + 20));
+  const height = Math.max(200, ...nodes.map((n) => at(n.id).y + NODE_H + 20));
   const toneRing: Record<GNode["tone"], string> = {
     cyan: "border-accent-cyan/50 bg-accent-cyan/10",
     accent: "border-accent/50 bg-accent/10",
@@ -473,7 +475,8 @@ function HandoffDiagram({ agents }: { agents: Record<string, boolean> }) {
 
   return (
     <div className="card p-4">
-      <div className="overflow-x-auto">
+      {/* Bounded scroll viewport so the graph always fits on screen. */}
+      <div className="overflow-auto rounded-xl border border-white/10" style={{ maxHeight: 320 }}>
         <div
           ref={wrap}
           onPointerMove={onMove}
