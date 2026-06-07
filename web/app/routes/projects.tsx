@@ -172,6 +172,12 @@ export default function Projects() {
                   >
                     Edit
                   </Link>
+                  <Link
+                    to="/configure"
+                    className="rounded-lg border border-white/15 px-3 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:border-white/30 hover:bg-white/5"
+                  >
+                    Configure
+                  </Link>
                   <Form method="post">
                     <input type="hidden" name="projectId" value={p.projectId} />
                     <button
