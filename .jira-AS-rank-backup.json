@@ -1,0 +1,182 @@
+[
+ [
+  "AS-1",
+  "Integrate in Jira Flow"
+ ],
+ [
+  "AS-2",
+  "Synapse: connective data layer pipeline (Connect → Ingest → Normalise → Store & Index → Reason → Deliver)"
+ ],
+ [
+  "AS-3",
+  "Synapse input connector: databases (SQL, NoSQL, warehouses)"
+ ],
+ [
+  "AS-4",
+  "Synapse input connector: APIs & webhooks"
+ ],
+ [
+  "AS-5",
+  "Synapse input connector: object storage & files"
+ ],
+ [
+  "AS-6",
+  "Synapse input connector: streaming & feeds"
+ ],
+ [
+  "AS-7",
+  "RAG & reasoning layer: Haystack + LangChain pipelines on Fargate"
+ ],
+ [
+  "AS-8",
+  "Output interface: Webhooks & Slack notifications"
+ ],
+ [
+  "AS-9",
+  "Output interface: database write-back (Postgres / Snowflake / BigQuery)"
+ ],
+ [
+  "AS-10",
+  "Output interface: file exports (CSV / Parquet / JSON to S3 or Blob)"
+ ],
+ [
+  "AS-11",
+  "Output interface: REST / GraphQL API for runs, artifacts, and analyses"
+ ],
+ [
+  "AS-12",
+  "Model provider: AWS Bedrock (managed, in-account inference)"
+ ],
+ [
+  "AS-13",
+  "Model provider: local LM Studio (fully offline)"
+ ],
+ [
+  "AS-14",
+  "Use case: investing & capital-markets research agent"
+ ],
+ [
+  "AS-15",
+  "Generic label-driven workflow engine (workflows beyond coding)"
+ ],
+ [
+  "AS-16",
+  "Store & analyse: run-outcome analytics over time"
+ ],
+ [
+  "AS-17",
+  "Human Override: pull-the-cord — pause, re-route, or kill a story mid-flight"
+ ],
+ [
+  "AS-18",
+  "Usage-based metered billing (pay-per-use pricing model)"
+ ],
+ [
+  "AS-19",
+  "As a user, I want a cost overview"
+ ],
+ [
+  "AS-20",
+  "As an admin, I want to see all costs of all user projects"
+ ],
+ [
+  "AS-21",
+  "As a user, I want to see my costs split into projects"
+ ],
+ [
+  "AS-22",
+  "As a user, I want to log in"
+ ],
+ [
+  "AS-23",
+  "As a user, I want to sign up"
+ ],
+ [
+  "AS-24",
+  "As a user, I want to change my password"
+ ],
+ [
+  "AS-25",
+  "As a user, I want to manage my projects (add, list, delete) with credentials stored securely"
+ ],
+ [
+  "AS-26",
+  "As an operator, I want strict multi-tenant isolation across data, credentials, and compute"
+ ],
+ [
+  "AS-27",
+  "As a user, I want a live run dashboard of agent runs and events"
+ ],
+ [
+  "AS-28",
+  "As a user, I want the label-driven story pipeline (revise → implement → test → QA)"
+ ],
+ [
+  "AS-29",
+  "As a user, I want #ready stories implemented in an isolated runner that opens a real PR"
+ ],
+ [
+  "AS-30",
+  "As an operator, I want an inline execution mode that posts a generated implementation as a Jira comment"
+ ],
+ [
+  "AS-31",
+  "As an operator, I want optional native Jira workflow status transitions mirroring labels"
+ ],
+ [
+  "AS-32",
+  "As a visitor, I want a marketing landing site that explains the product"
+ ],
+ [
+  "AS-33",
+  "As a visitor, I want the marketing site in English and German with a language switcher"
+ ],
+ [
+  "AS-34",
+  "As a marketer, I want per-page SEO (canonical URL + Open Graph/Twitter cards)"
+ ],
+ [
+  "AS-35",
+  "As an operator, I want the runs dashboard protected behind authentication"
+ ],
+ [
+  "AS-36",
+  "As a security owner, I want session tokens verified and refreshed (Cognito JWT validation)"
+ ],
+ [
+  "AS-37",
+  "As a security owner, I want a Web Application Firewall (WAF) protecting the public surfaces"
+ ],
+ [
+  "AS-38",
+  "As a security owner, I want API rate limiting and abuse protection"
+ ],
+ [
+  "AS-39",
+  "As an operator, I want the runner packaged as a container image built and run on Fargate"
+ ],
+ [
+  "AS-40",
+  "Bake & run the Claude Code CLI inside the runner image"
+ ],
+ [
+  "AS-41",
+  "I want different agents of different kinds (plan agents, implement agents that take plan) I want a flow that implements this... The user should configure the flow in a editor and leverage our agents and infrastructure"
+ ],
+ [
+  "AS-42",
+  "Plan agent: produce an executable plan from a goal"
+ ],
+ [
+  "AS-43",
+  "Implement agent: execute a given plan"
+ ],
+ [
+  "AS-44",
+  "Flow engine: orchestrate multi-agent flows"
+ ],
+ [
+  "AS-45",
+  "Flow editor: configure flows visually"
+ ]
+]
